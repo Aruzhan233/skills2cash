@@ -1,12 +1,8 @@
 "use client";
 
 import { useState } from "react";
-<<<<<<< HEAD
-import { Calculator, Sparkles } from "lucide-react";
-=======
 import { Calculator, Check, Sparkles } from "lucide-react";
 import Link from "next/link";
->>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
 import { RequireProfile } from "@/components/require-profile";
 import { Badge, Button, Card, CardTitle, ErrorState, Field, GeneratedBadge, Input, LinkButton, Notice, PageHeader, Spinner, Textarea } from "@/components/ui";
 import { useWorkspace } from "@/components/workspace";
@@ -58,11 +54,6 @@ function defaults(ws: ReturnType<typeof useWorkspace>): PricingInput {
 
 export default function PricingPage() {
   return (
-<<<<<<< HEAD
-    <RequireProfile what="The Pricing Builder">
-      <PricingBuilder />
-    </RequireProfile>
-=======
     <>
       <PlanCards />
       <RequireProfile what="The Pricing Builder"><PricingBuilder /></RequireProfile>
@@ -114,7 +105,6 @@ function PlanCards() {
         </Card>
       </div>
     </section>
->>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
   );
 }
 

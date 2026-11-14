@@ -7,10 +7,6 @@ coverage/
 next-env.d.ts
 .vercel
 .env
-<<<<<<< HEAD
-.env*.local
-=======
 .env.local
->>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
 .DS_Store
 npm-debug.log*

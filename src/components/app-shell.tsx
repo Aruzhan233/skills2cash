@@ -16,10 +16,7 @@ export const NAV = [
   { href: "/path", label: "Learning Path" },
   { href: "/service-builder", label: "Service Builder" },
   { href: "/pricing", label: "Pricing" },
-<<<<<<< HEAD
-=======
   { href: "/subscription", label: "Subscription" },
->>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
   { href: "/practice", label: "Practice" },
   { href: "/assignments", label: "Missions" },
   { href: "/readiness", label: "Readiness" },
@@ -102,10 +99,7 @@ function ModeBanner() {
   const ws = useWorkspace();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
-<<<<<<< HEAD
-=======
   const [transferError, setTransferError] = useState("");
->>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
   if (ws.mode === "demo") {
     return (
       <div className="border-b border-warn/20 bg-warn/[0.07]">
@@ -145,8 +139,6 @@ function ModeBanner() {
       </div>
     );
   }
-<<<<<<< HEAD
-=======
   if (ws.guest) {
     return (
       <div className="border-b border-violet/20 bg-violet-tint/40">
@@ -159,7 +151,6 @@ function ModeBanner() {
       </div>
     );
   }
->>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
   if (ws.storage === "local") {
     return (
       <div className="border-b border-line bg-surface">

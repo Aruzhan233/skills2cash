@@ -22,10 +22,6 @@ import {
 type AuthStatus = "loading" | "signed_in" | "signed_out" | "disabled";
 export type LoadStatus = "loading" | "ready" | "error" | "needs_auth";
 
-<<<<<<< HEAD
-interface WorkspaceCtx {
-  mode: Mode;
-=======
 export interface GuestUsage { assessments_used: number; offers_created: number; simulations_completed: number }
 export interface GuestData { sessionId: string; createdAt: string; usage: GuestUsage }
 const GUEST_MODE_KEY = "skills2cash_guest_session";
@@ -51,7 +47,6 @@ interface WorkspaceCtx {
   beginGuest: () => void;
   clearGuest: () => void;
   migrateGuestData: () => Promise<void>;
->>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
   scripted: boolean;
   setScripted: (v: boolean) => void;
   auth: { status: AuthStatus; email: string | null };
@@ -100,11 +95,8 @@ function snapshotChanged(prev: ReadinessSnapshot | undefined, next: Omit<Readine
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<Mode | null>(null);
-<<<<<<< HEAD
-=======
   const [guest, setGuest] = useState(false);
   const [guestUsage, setGuestUsage] = useState<GuestUsage>(EMPTY_USAGE);
->>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
   const [scripted, setScriptedState] = useState(false);
   const [auth, setAuth] = useState<{ status: AuthStatus; email: string | null; userId: string | null }>({
     status: supabaseConfigured ? "loading" : "disabled",
@@ -121,14 +113,11 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   // mode + scripted flag from storage
   useEffect(() => {
     setMode(localStorage.getItem(MODE_KEY) === "demo" ? "demo" : "live");
-<<<<<<< HEAD
-=======
     setGuest(localStorage.getItem(GUEST_MODE_KEY) === "1");
     try {
       const stored = JSON.parse(localStorage.getItem(GUEST_DATA_KEY) || "null") as GuestData | null;
       if (stored?.usage) setGuestUsage({ ...EMPTY_USAGE, ...stored.usage });
     } catch { /* malformed guest counters reset safely */ }
->>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
     setScriptedState(localStorage.getItem(SCRIPTED_KEY) === "1");
   }, []);
 
@@ -150,30 +139,19 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const repo: Repository | null = useMemo(() => {
     if (mode === null || typeof window === "undefined") return null;
     if (mode === "demo") return demoRepo();
-<<<<<<< HEAD
-=======
     if (guest) return new LocalRepository(GUEST_DATA_KEY, localStorage);
->>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
     if (!supabaseConfigured) return new LocalRepository("s2c:local", localStorage);
     const sb = getSupabase();
     if (sb && auth.status === "signed_in" && auth.userId) return new SupabaseRepository(sb, auth.userId);
     return null;
-<<<<<<< HEAD
-  }, [mode, auth.status, auth.userId]);
-=======
   }, [mode, guest, auth.status, auth.userId]);
->>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
 
   const storage: WorkspaceCtx["storage"] = mode === "demo" ? "demo" : repo?.kind ?? null;
 
   useEffect(() => {
     if (mode === null) return;
     if (!repo) {
-<<<<<<< HEAD
-      if (mode === "live" && auth.status === "signed_out") {
-=======
       if (mode === "live" && auth.status === "signed_out" && !guest) {
->>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
         setState(EMPTY_STATE);
         setStatus("needs_auth");
       }
@@ -213,17 +191,10 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-<<<<<<< HEAD
-  }, [repo, mode, auth.status, nonce]);
-
-  const requireRepo = useCallback((): Repository => {
-    if (!repo) throw new Error("Please sign in to save your progress.");
-=======
   }, [repo, mode, auth.status, guest, nonce]);
 
   const requireRepo = useCallback((): Repository => {
     if (!repo) throw new Error("Choose Continue as Guest or sign in to save your progress.");
->>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
     return repo;
   }, [repo]);
 
@@ -256,8 +227,6 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
   const ctx: WorkspaceCtx = {
     mode: mode ?? "live",
-<<<<<<< HEAD
-=======
     guest,
     guestUsage,
     beginGuest: () => {
@@ -298,7 +267,6 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       setGuestUsage(EMPTY_USAGE);
       setNonce((n) => n + 1);
     },
->>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
     scripted,
     setScripted: (v) => {
       localStorage.setItem(SCRIPTED_KEY, v ? "1" : "0");
@@ -311,24 +279,16 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     error,
     reload: () => setNonce((n) => n + 1),
     saveProfile: async (p) => {
-<<<<<<< HEAD
-      await requireRepo().saveProfile(p);
-=======
       if (guest && !stateRef.current.profile && guestUsage.assessments_used >= 1) throw new Error("You have used your free skill assessment. View Pricing to unlock Pro.");
       await requireRepo().saveProfile(p);
       if (guest && !stateRef.current.profile) { const nextUsage = { ...guestUsage, assessments_used: guestUsage.assessments_used + 1 }; persistGuestUsage(nextUsage); setGuestUsage(nextUsage); }
->>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
       const next = { ...stateRef.current, profile: p };
       setState(await afterEvidence(next));
     },
     saveOffer: async (o) => {
-<<<<<<< HEAD
-      await requireRepo().saveOffer(o);
-=======
       if (guest && !stateRef.current.offer && guestUsage.offers_created >= 1) throw new Error("You have used your free service offer. View Pricing to unlock Pro.");
       await requireRepo().saveOffer(o);
       if (guest && !stateRef.current.offer) { const nextUsage = { ...guestUsage, offers_created: guestUsage.offers_created + 1 }; persistGuestUsage(nextUsage); setGuestUsage(nextUsage); }
->>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
       setState(await afterEvidence({ ...stateRef.current, offer: o }));
     },
     savePricing: async (p) => {
@@ -340,24 +300,18 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       setState(await afterEvidence({ ...stateRef.current, submissions: [...stateRef.current.submissions, s] }));
     },
     saveSession: async (s) => {
-<<<<<<< HEAD
-=======
       const prior = stateRef.current.sessions.find((x) => x.id === s.id);
       if (guest && s.status === "active" && !prior && guestUsage.simulations_completed >= 1) throw new Error("You have used your free simulation. View Pricing to unlock Pro.");
->>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
       await requireRepo().saveSession(s);
       const cur = stateRef.current;
       const sessions = cur.sessions.some((x) => x.id === s.id) ? cur.sessions.map((x) => (x.id === s.id ? s : x)) : [...cur.sessions, s];
       const next = { ...cur, sessions };
       setState(s.status === "completed" ? await afterEvidence(next) : next);
-<<<<<<< HEAD
-=======
       if (guest && s.status === "completed" && prior?.status !== "completed") {
         const nextUsage = { ...guestUsage, simulations_completed: guestUsage.simulations_completed + 1 };
         persistGuestUsage(nextUsage);
         setGuestUsage(nextUsage);
       }
->>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
     },
     resetWorkspace: async () => {
       await requireRepo().reset();
@@ -380,10 +334,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       setScriptedState(false);
       setMode("live");
     },
-<<<<<<< HEAD
-=======
     
->>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
     signOut: async () => {
       await getSupabase()?.auth.signOut();
     },
