@@ -123,7 +123,7 @@ All thresholds live in `src/lib/config.ts` and are initial product settings, not
 Create an **empty public** repository named `skills2cash` on GitHub (no README, no .gitignore), then from the project folder:
 
 ```bash
-git remote add origin https://github.com/<your-account>/skills2cash.git
+git remote add origin https://github.com/Aruzhan233/skills2cash.git
 git branch -M main
 git push -u origin main
 ```
