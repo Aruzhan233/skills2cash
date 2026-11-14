@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Calculator, Sparkles } from "lucide-react";
+import { Calculator, Check, Sparkles } from "lucide-react";
+import Link from "next/link";
 import { RequireProfile } from "@/components/require-profile";
 import { Badge, Button, Card, CardTitle, ErrorState, Field, GeneratedBadge, Input, LinkButton, Notice, PageHeader, Spinner, Textarea } from "@/components/ui";
 import { useWorkspace } from "@/components/workspace";
@@ -53,9 +54,57 @@ function defaults(ws: ReturnType<typeof useWorkspace>): PricingInput {
 
 export default function PricingPage() {
   return (
-    <RequireProfile what="The Pricing Builder">
-      <PricingBuilder />
-    </RequireProfile>
+    <>
+      <PlanCards />
+      <RequireProfile what="The Pricing Builder"><PricingBuilder /></RequireProfile>
+    </>
+  );
+}
+
+function PlanCards() {
+  const ws = useWorkspace();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  async function upgrade() {
+    if (ws.guest || ws.auth.status !== "signed_in") {
+      window.location.assign("/signup?next=%2Fpricing");
+      return;
+    }
+    setBusy(true);
+    setError("");
+    try {
+      const { getSupabase } = await import("@/lib/client/supabase");
+      const { data } = await getSupabase()?.auth.getSession() ?? { data: { session: null } };
+      const token = data.session?.access_token;
+      if (!token) throw new Error("Please sign in again to continue to checkout.");
+      const res = await fetch("/api/billing/checkout", { method: "POST", headers: { Authorization: `Bearer ${token}` } });
+      const json = await res.json() as { url?: string; error?: string };
+      if (!res.ok || !json.url) throw new Error(json.error || "Checkout could not be started.");
+      window.location.assign(json.url);
+    } catch (e) {
+      setError((e as Error).message);
+      setBusy(false);
+    }
+  }
+  return (
+    <section className="mb-8">
+      <PageHeader title="Plans" sub="Start with the free plan. Upgrade when you need the full Skills2Cash journey." />
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <Badge>FREE</Badge><p className="mt-3 text-3xl font-bold">$0<span className="text-sm font-normal text-muted"> / month</span></p>
+          <ul className="my-5 space-y-2 text-sm text-ink-2">{["1 skill assessment", "1 service offer", "1 simulation", "Basic access"].map((x) => <li key={x} className="flex gap-2"><Check className="h-4 w-4 text-good" />{x}</li>)}</ul>
+          <Button variant="secondary" disabled className="w-full">Current Free Plan</Button>
+        </Card>
+        <Card className="border-violet/50 bg-violet-tint/20">
+          <Badge tone="violet">PRO</Badge><p className="mt-3 text-3xl font-bold">$19<span className="text-sm font-normal text-muted"> / month</span></p>
+          <ul className="my-5 space-y-2 text-sm text-ink-2">{["All 7 scenarios", "All missions", "Full Readiness", "Extended recommendations", "Unlimited product access"].map((x) => <li key={x} className="flex gap-2"><Check className="h-4 w-4 text-violet-soft" />{x}</li>)}</ul>
+          <Button className="w-full" onClick={upgrade} disabled={busy}>{busy ? <Spinner /> : null}{busy ? "Opening checkout…" : "Upgrade to Pro"}</Button>
+          {ws.guest && <p className="mt-2 text-xs text-muted">Create an account first. Your guest progress stays in this browser.</p>}
+          {error && <p role="alert" className="mt-2 text-sm text-danger">{error}</p>}
+          <Link href="/dashboard" className="mt-3 block text-center text-sm text-muted hover:text-ink">Back to Dashboard</Link>
+        </Card>
+      </div>
+    </section>
   );
 }
 

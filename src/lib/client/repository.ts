@@ -49,7 +49,8 @@ export class LocalRepository implements Repository {
     try {
       const raw = this.storage.getItem(this.key);
       if (!raw) return { ...EMPTY_STATE };
-      return { ...EMPTY_STATE, ...(JSON.parse(raw) as Partial<WorkspaceState>) };
+      const parsed = JSON.parse(raw) as Partial<WorkspaceState> & { workspace?: Partial<WorkspaceState> };
+      return { ...EMPTY_STATE, ...(parsed.workspace ?? parsed) };
     } catch {
       return { ...EMPTY_STATE };
     }
@@ -58,7 +59,10 @@ export class LocalRepository implements Repository {
   private write(fn: (s: WorkspaceState) => WorkspaceState) {
     const next = fn(this.read());
     try {
-      this.storage.setItem(this.key, JSON.stringify(next));
+      if (this.key === "skills2cash_guest_data") {
+        const prior = JSON.parse(this.storage.getItem(this.key) || "{}") as Record<string, unknown>;
+        this.storage.setItem(this.key, JSON.stringify({ ...prior, workspace: next }));
+      } else this.storage.setItem(this.key, JSON.stringify(next));
     } catch {
       throw new Error("Could not save to browser storage (it may be full or disabled).");
     }

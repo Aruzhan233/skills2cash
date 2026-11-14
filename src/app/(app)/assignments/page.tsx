@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { CheckCircle2, Circle } from "lucide-react";
 import { RequireProfile } from "@/components/require-profile";
+import { GuestPaywall } from "@/components/guest-paywall";
 import { Badge, Card, PageHeader, ScorePill } from "@/components/ui";
 import { useWorkspace } from "@/components/workspace";
 import { ASSIGNMENTS } from "@/lib/assignments";
@@ -13,7 +14,7 @@ import { STAGE_BY_KEY } from "@/lib/stages";
 export default function AssignmentsPage() {
   return (
     <RequireProfile what="Your missions">
-      <List />
+      <GuestPaywall feature="All missions"><List /></GuestPaywall>
     </RequireProfile>
   );
 }

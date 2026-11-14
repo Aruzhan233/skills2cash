@@ -16,6 +16,7 @@ export const NAV = [
   { href: "/path", label: "Learning Path" },
   { href: "/service-builder", label: "Service Builder" },
   { href: "/pricing", label: "Pricing" },
+  { href: "/subscription", label: "Subscription" },
   { href: "/practice", label: "Practice" },
   { href: "/assignments", label: "Missions" },
   { href: "/readiness", label: "Readiness" },
@@ -98,6 +99,7 @@ function ModeBanner() {
   const ws = useWorkspace();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+  const [transferError, setTransferError] = useState("");
   if (ws.mode === "demo") {
     return (
       <div className="border-b border-warn/20 bg-warn/[0.07]">
@@ -133,6 +135,18 @@ function ModeBanner() {
           >
             Exit demo
           </button>
+        </div>
+      </div>
+    );
+  }
+  if (ws.guest) {
+    return (
+      <div className="border-b border-violet/20 bg-violet-tint/40">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-4 py-2 text-xs text-ink-2 sm:px-6">
+          Guest workspace — progress is saved in this browser. {ws.auth.status === "signed_in" ? (
+            <button disabled={busy} onClick={async () => { setBusy(true); setTransferError(""); try { await ws.migrateGuestData(); } catch (e) { setTransferError((e as Error).message); } finally { setBusy(false); } }} className="font-semibold text-violet-soft underline">{busy ? "Transferring…" : "Transfer progress to my account"}</button>
+          ) : <Link href="/signup?next=%2Fdashboard" className="font-semibold text-violet-soft underline">Create an account to keep it</Link>}
+          {transferError && <span role="alert" className="basis-full text-danger">Transfer failed: {transferError} Your guest data is still saved here.</span>}
         </div>
       </div>
     );

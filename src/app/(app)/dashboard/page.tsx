@@ -10,6 +10,7 @@ import { formatDateTime } from "@/lib/cn";
 import { competencyScores, completedSessions, computeReadiness, currentStage, recommendNext, stageProgress } from "@/lib/progress";
 import { SCENARIO_BY_KEY } from "@/lib/scenarios";
 import { STAGE_BY_KEY, STAGES } from "@/lib/stages";
+import { PlanUsage } from "@/components/plan-usage";
 
 export default function DashboardPage() {
   return (
@@ -78,6 +79,8 @@ function Dashboard() {
           </Link>
         </Card>
       </div>
+
+      <PlanUsage />
 
       <Card className="mt-4">
         <CardTitle sub={`Current stage: ${stage.title} — ${stage.tagline}`}>Learning path</CardTitle>

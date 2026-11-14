@@ -19,6 +19,7 @@ import {
   Textarea,
 } from "@/components/ui";
 import { useWorkspace } from "@/components/workspace";
+import { GuestPaywall } from "@/components/guest-paywall";
 import { callAI, offlineAI, type ApiError } from "@/lib/client/ai";
 import { COMPETENCY_LIST } from "@/lib/competencies";
 import { newId } from "@/lib/id";
@@ -436,6 +437,9 @@ export default function OnboardingPage() {
   }
 
   const s = STEPS[step];
+  if (ws.guest && ws.guestUsage.assessments_used >= 1 && ws.state.profile) {
+    return <GuestPaywall feature="Another skill assessment" />;
+  }
   return (
     <div className="mx-auto max-w-2xl">
       <PageHeader

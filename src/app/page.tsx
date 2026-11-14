@@ -68,11 +68,11 @@ export default function Landing() {
             Discover what you can offer, build a service, master pricing, and practise selling with AI-powered customer simulations.
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href="/onboarding" className={buttonClass("primary", "lg")}>
-              Discover My Skills <ArrowRight className="h-4 w-4" aria-hidden />
+            <Link href="/guest-start" className={buttonClass("primary", "lg")}>
+              Continue as Guest <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
-            <Link href="/demo" className={buttonClass("secondary", "lg")}>
-              Try Demo — no sign-up
+            <Link href="/login" className={buttonClass("secondary", "lg")}>
+              Sign In / Create Account
             </Link>
           </div>
           <a href="#how" className="mt-5 inline-block text-sm text-muted underline-offset-4 hover:text-ink hover:underline">

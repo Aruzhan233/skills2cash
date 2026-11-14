@@ -52,11 +52,25 @@ npm run check       # all of the above
 | --- | --- | --- |
 | `OPENAI_API_KEY` | server only | Live AI in all 6 AI routes. Missing → routes return `503 not_configured`; UI shows an error with **Retry** and a labelled offline option |
 | `OPENAI_MODEL` | server only | Optional, default `gpt-4o-mini` |
-| `OPENAI_BASE_URL` | server only | Optional OpenAI-compatible endpoint with JSON mode (e.g. Groq `https://api.groq.com/openai/v1`), default OpenAI |
+| `OPENAI_BASE_URL` | server only | Optional OpenAI-compatible API base URL; defaults to `https://api.openai.com/v1` |
 | `NEXT_PUBLIC_SUPABASE_URL` | public | Accounts + cloud persistence |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | public | Accounts + cloud persistence (anon key is safe: every table has RLS) |
+| `STRIPE_SECRET_KEY` | server only, TEST MODE (`sk_test_...`) | Hosted subscription checkout and Stripe API |
+| `STRIPE_PUBLISHABLE_KEY` | public, TEST MODE (`pk_test_...`) | Reserved for Stripe.js integrations; hosted Checkout currently redirects directly |
+| `STRIPE_WEBHOOK_SECRET` | server only | Verifies Stripe webhook signatures |
+| `STRIPE_PRICE_ID` | server only | Stripe TEST price; checkout verifies it is exactly $19 USD/month |
+| `SUPABASE_SERVICE_ROLE_KEY` | server only | Lets verified Stripe webhooks update subscription access; never expose it to the browser |
 
-No service-role key is used. `GET /api/health` reports which integrations are configured (booleans only).
+The Supabase service-role key is used only by the server-side Stripe webhook to write verified subscription state. `GET /api/health` reports the existing AI and Supabase client configuration (booleans only).
+
+**Guest mode and billing**
+
+- Landing → **Continue as Guest** opens an isolated local workspace in `skills2cash_guest_data`. Guest progress and free usage counters remain in this browser. After signing in, use the guest banner to transfer records; existing account records are preserved and guest storage is cleared only after the transfer succeeds.
+- Apply `supabase/migrations/20261114000200_billing.sql` before enabling billing. It creates an owner-readable subscription table with no client write policies.
+- Apply `supabase/migrations/20261114000300_grants.sql` after billing when the Supabase project needs explicit Data API table grants. RLS policies remain responsible for row-level access.
+- In Stripe TEST mode, create a recurring USD $19 monthly Price and configure the five Stripe/Supabase environment variables above. Configure the webhook endpoint as `/api/billing/webhook` for `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`, and `invoice.payment_failed`.
+- Checkout is available only to signed-in users. Guests retain their browser data and must create/sign into an account before checkout. Pro access is recorded only after signature-verified Stripe webhook processing.
+- Check plan and usage under Dashboard or **Subscription**. Stripe credentials and webhook processing require configured test credentials and a deployed Supabase migration.
 
 **Modes**
 
@@ -70,7 +84,8 @@ No service-role key is used. `GET /api/health` reports which integrations are co
 2. SQL editor → run, in order:
    - `supabase/migrations/20261114000000_init.sql` — 11 tables, indexes, constraints, triggers, RLS policies
    - `supabase/migrations/20261114000100_seed.sql` — mission and scenario catalog (generated from `src/lib` by `npm run db:seed-sql`)
-   - `supabase/migrations/20261114000200_grants.sql` — explicit table grants for the `authenticated` role (needed when the project does not auto-expose new tables)
+   - `supabase/migrations/20261114000200_billing.sql` — subscription status, read-only for authenticated clients
+   - `supabase/migrations/20261114000300_grants.sql` — explicit Data API grants, still subject to RLS
 
    or with the CLI: `supabase link --project-ref <ref> && supabase db push`.
 3. Authentication → Providers → Email: enabled. For a hackathon demo you may disable *Confirm email* so sign-up logs in immediately.
@@ -123,7 +138,7 @@ All thresholds live in `src/lib/config.ts` and are initial product settings, not
 Create an **empty public** repository named `skills2cash` on GitHub (no README, no .gitignore), then from the project folder:
 
 ```bash
-git remote add origin https://github.com/Aruzhan233/skills2cash.git
+git remote add origin https://github.com/<your-account>/skills2cash.git
 git branch -M main
 git push -u origin main
 ```

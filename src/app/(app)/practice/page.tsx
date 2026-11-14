@@ -23,7 +23,8 @@ export default function PracticePage() {
 }
 
 function Library() {
-  const { state } = useWorkspace();
+  const ws = useWorkspace();
+  const { state } = ws;
   const [filter, setFilter] = useState<Difficulty | "All">("All");
   const done = completedSessions(state.sessions);
   const active = state.sessions.filter((s) => s.status === "active" && s.messages.some((m) => m.role === "user"));
@@ -101,9 +102,13 @@ function Library() {
               ))}
             </div>
             <div className="mt-auto pt-4">
-              <LinkButton href={`/practice/${s.key}`} className="w-full">
-                <MessagesSquare className="h-4 w-4" aria-hidden /> Start
-              </LinkButton>
+              {ws.guest && ws.guestUsage.simulations_completed >= 1 ? (
+                <LinkButton href="/pricing" variant="secondary" className="w-full">Free simulation used · View Pro</LinkButton>
+              ) : (
+                <LinkButton href={`/practice/${s.key}`} className="w-full">
+                  <MessagesSquare className="h-4 w-4" aria-hidden /> Start
+                </LinkButton>
+              )}
             </div>
           </Card>
         ))}
