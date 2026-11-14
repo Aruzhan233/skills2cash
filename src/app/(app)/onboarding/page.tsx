@@ -19,6 +19,10 @@ import {
   Textarea,
 } from "@/components/ui";
 import { useWorkspace } from "@/components/workspace";
+<<<<<<< HEAD
+=======
+import { GuestPaywall } from "@/components/guest-paywall";
+>>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
 import { callAI, offlineAI, type ApiError } from "@/lib/client/ai";
 import { COMPETENCY_LIST } from "@/lib/competencies";
 import { newId } from "@/lib/id";
@@ -436,6 +440,12 @@ export default function OnboardingPage() {
   }
 
   const s = STEPS[step];
+<<<<<<< HEAD
+=======
+  if (ws.guest && ws.guestUsage.assessments_used >= 1 && ws.state.profile) {
+    return <GuestPaywall feature="Another skill assessment" />;
+  }
+>>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
   return (
     <div className="mx-auto max-w-2xl">
       <PageHeader

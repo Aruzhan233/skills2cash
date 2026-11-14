@@ -10,6 +10,10 @@ import { formatDateTime } from "@/lib/cn";
 import { competencyScores, completedSessions, computeReadiness, currentStage, recommendNext, stageProgress } from "@/lib/progress";
 import { SCENARIO_BY_KEY } from "@/lib/scenarios";
 import { STAGE_BY_KEY, STAGES } from "@/lib/stages";
+<<<<<<< HEAD
+=======
+import { PlanUsage } from "@/components/plan-usage";
+>>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
 
 export default function DashboardPage() {
   return (
@@ -79,6 +83,11 @@ function Dashboard() {
         </Card>
       </div>
 
+<<<<<<< HEAD
+=======
+      <PlanUsage />
+
+>>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
       <Card className="mt-4">
         <CardTitle sub={`Current stage: ${stage.title} — ${stage.tagline}`}>Learning path</CardTitle>
         <ol className="grid gap-2 sm:grid-cols-5">

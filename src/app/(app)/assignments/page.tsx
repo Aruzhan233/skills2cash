@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { CheckCircle2, Circle } from "lucide-react";
 import { RequireProfile } from "@/components/require-profile";
+<<<<<<< HEAD
+=======
+import { GuestPaywall } from "@/components/guest-paywall";
+>>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
 import { Badge, Card, PageHeader, ScorePill } from "@/components/ui";
 import { useWorkspace } from "@/components/workspace";
 import { ASSIGNMENTS } from "@/lib/assignments";
@@ -13,7 +17,11 @@ import { STAGE_BY_KEY } from "@/lib/stages";
 export default function AssignmentsPage() {
   return (
     <RequireProfile what="Your missions">
+<<<<<<< HEAD
       <List />
+=======
+      <GuestPaywall feature="All missions"><List /></GuestPaywall>
+>>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
     </RequireProfile>
   );
 }

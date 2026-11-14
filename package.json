@@ -13,6 +13,10 @@
     "db:seed-sql": "tsx scripts/generate-seed.ts"
   },
   "dependencies": {
+<<<<<<< HEAD
+=======
+    "@google/genai": "^3.3.0",
+>>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
     "@supabase/supabase-js": "^2.57.4",
     "clsx": "^2.1.1",
     "lucide-react": "^1.73.0",
@@ -20,6 +24,10 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "recharts": "^3.2.1",
+<<<<<<< HEAD
+=======
+    "stripe": "^23.1.0",
+>>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
     "tailwind-merge": "^3.7.0",
     "zod": "^3.25.76"
   },

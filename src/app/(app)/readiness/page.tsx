@@ -4,6 +4,10 @@ import Link from "next/link";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { AlertTriangle } from "lucide-react";
 import { RequireProfile } from "@/components/require-profile";
+<<<<<<< HEAD
+=======
+import { GuestPaywall } from "@/components/guest-paywall";
+>>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
 import { Badge, Card, CardTitle, LinkButton, PageHeader, Progress, ScorePill } from "@/components/ui";
 import { useWorkspace } from "@/components/workspace";
 import { ASSIGNMENTS } from "@/lib/assignments";
@@ -14,7 +18,11 @@ import { READINESS_KEYS } from "@/lib/types";
 export default function ReadinessPage() {
   return (
     <RequireProfile what="Your readiness dashboard">
+<<<<<<< HEAD
       <Readiness />
+=======
+      <GuestPaywall feature="Full Readiness"><Readiness /></GuestPaywall>
+>>>>>>> 12acf10 (feat: implement guest mode and pricing paywall)
     </RequireProfile>
   );
 }
