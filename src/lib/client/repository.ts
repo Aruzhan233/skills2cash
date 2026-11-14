@@ -14,7 +14,9 @@ import {
   type RoleplaySession,
   type ServiceOffer,
   type SkillProfile,
+  type WeeklyMission,
   type WorkspaceState,
+  type XpTransaction,
 } from "../types";
 
 export interface LearningPathRecord {
@@ -34,8 +36,26 @@ export interface Repository {
   saveSession(s: RoleplaySession): Promise<void>;
   addSnapshot(s: ReadinessSnapshot): Promise<void>;
   saveLearningPath(p: LearningPathRecord): Promise<void>;
+  /** Inserts or updates weekly missions by id. */
+  saveWeeklyMissions(ms: WeeklyMission[]): Promise<void>;
+  /** Records an XP award. Idempotent on (source, refKey): returns false when it already existed. */
+  addXp(t: XpTransaction): Promise<boolean>;
+  /** Where weekly missions and XP are stored. "browser" means the database tables are not available yet. */
+  retentionStorage(): "database" | "browser";
   reset(): Promise<void>;
 }
+
+function mergeMissions(cur: WeeklyMission[], ms: WeeklyMission[]): WeeklyMission[] {
+  const byId = new Map(cur.map((m) => [m.id, m]));
+  for (const m of ms) {
+    // one row per (week, template): never store the same mission twice
+    const dup = [...byId.values()].find((x) => x.id !== m.id && x.weekStart === m.weekStart && x.templateKey === m.templateKey);
+    if (!dup) byId.set(m.id, m);
+  }
+  return [...byId.values()];
+}
+
+const sameAward = (a: XpTransaction, b: XpTransaction) => a.source === b.source && a.refKey === b.refKey;
 
 // ------------------------------------------------------------------ local
 export class LocalRepository implements Repository {
@@ -97,6 +117,17 @@ export class LocalRepository implements Repository {
   async saveLearningPath() {
     /* derived from state in local mode */
   }
+  async saveWeeklyMissions(ms: WeeklyMission[]) {
+    this.write((s) => ({ ...s, weeklyMissions: mergeMissions(s.weeklyMissions, ms) }));
+  }
+  async addXp(t: XpTransaction) {
+    if (this.read().xp.some((x) => sameAward(x, t))) return false;
+    this.write((s) => ({ ...s, xp: [...s.xp, t] }));
+    return true;
+  }
+  retentionStorage() {
+    return "browser" as const;
+  }
   async reset() {
     this.storage.removeItem(this.key);
   }
@@ -117,6 +148,125 @@ export class SupabaseRepository implements Repository {
     private userId: string,
   ) {}
 
+  /**
+   * Weekly missions and XP live in tables added by migration 20261115000000_retention.sql.
+   * Until that migration is applied the tables do not exist, so these two collections
+   * fall back to this browser (clearly labelled in the UI) instead of breaking the app.
+   */
+  private retentionLocal = false;
+  private get retentionKey() {
+    return `s2c:retention:${this.userId}`;
+  }
+  private readRetention(): { weeklyMissions: WeeklyMission[]; xp: XpTransaction[] } {
+    try {
+      const raw = JSON.parse(localStorage.getItem(this.retentionKey) || "null") as { weeklyMissions?: WeeklyMission[]; xp?: XpTransaction[] } | null;
+      return { weeklyMissions: raw?.weeklyMissions ?? [], xp: raw?.xp ?? [] };
+    } catch {
+      return { weeklyMissions: [], xp: [] };
+    }
+  }
+  private writeRetention(v: { weeklyMissions: WeeklyMission[]; xp: XpTransaction[] }) {
+    try {
+      localStorage.setItem(this.retentionKey, JSON.stringify(v));
+    } catch {
+      throw new Error("Could not save to browser storage (it may be full or disabled).");
+    }
+  }
+  retentionStorage() {
+    return this.retentionLocal ? ("browser" as const) : ("database" as const);
+  }
+
+  private async loadRetention(): Promise<{ weeklyMissions: WeeklyMission[]; xp: XpTransaction[] }> {
+    const [wm, xp] = await Promise.all([
+      this.db.from("weekly_missions").select("*").order("created_at"),
+      this.db.from("xp_transactions").select("*").order("created_at"),
+    ]);
+    if (wm.error || xp.error) {
+      this.retentionLocal = true;
+      return this.readRetention();
+    }
+    this.retentionLocal = false;
+    return {
+      weeklyMissions: (wm.data as Row[]).map((r) => ({
+        id: r.id as string,
+        weekStart: r.week_start as string,
+        templateKey: r.template_key as string,
+        title: r.title as string,
+        description: r.description as string,
+        steps: (r.steps as string[]) ?? [],
+        reason: (r.reason as string) ?? "",
+        category: r.category as WeeklyMission["category"],
+        difficulty: r.difficulty as WeeklyMission["difficulty"],
+        xp: r.xp_reward as number,
+        deadline: r.deadline as string,
+        status: r.status as WeeklyMission["status"],
+        completionNote: (r.completion_note as string | null) ?? null,
+        completedAt: (r.completed_at as string | null) ?? null,
+        createdAt: r.created_at as string,
+      })),
+      xp: (xp.data as Row[]).map((r) => ({
+        id: r.id as string,
+        source: r.source as XpTransaction["source"],
+        refKey: r.ref_key as string,
+        amount: r.amount as number,
+        label: r.label as string,
+        createdAt: r.created_at as string,
+      })),
+    };
+  }
+
+  async saveWeeklyMissions(ms: WeeklyMission[]) {
+    if (!ms.length) return;
+    if (this.retentionLocal) {
+      const cur = this.readRetention();
+      this.writeRetention({ ...cur, weeklyMissions: mergeMissions(cur.weeklyMissions, ms) });
+      return;
+    }
+    check(
+      await this.db.from("weekly_missions").upsert(
+        ms.map((m) => ({
+          id: m.id,
+          user_id: this.userId,
+          week_start: m.weekStart,
+          template_key: m.templateKey,
+          title: m.title,
+          description: m.description,
+          steps: m.steps,
+          reason: m.reason,
+          category: m.category,
+          difficulty: m.difficulty,
+          xp_reward: m.xp,
+          deadline: m.deadline,
+          status: m.status,
+          completion_note: m.completionNote,
+          completed_at: m.completedAt,
+          created_at: m.createdAt,
+        })),
+        { onConflict: "id" },
+      ),
+    );
+  }
+
+  async addXp(t: XpTransaction) {
+    if (this.retentionLocal) {
+      const cur = this.readRetention();
+      if (cur.xp.some((x) => sameAward(x, t))) return false;
+      this.writeRetention({ ...cur, xp: [...cur.xp, t] });
+      return true;
+    }
+    // The unique (user_id, source, ref_key) constraint makes a repeated award a no-op.
+    const rows = check(
+      await this.db
+        .from("xp_transactions")
+        .upsert(
+          { id: t.id, user_id: this.userId, source: t.source, ref_key: t.refKey, amount: t.amount, label: t.label, created_at: t.createdAt },
+          { onConflict: "user_id,source,ref_key", ignoreDuplicates: true },
+        )
+        .select("id"),
+    ) as Row[] | null;
+    return (rows?.length ?? 0) > 0;
+  }
+
   async load(): Promise<WorkspaceState> {
     const [sp, offer, pricing, subs, sessions, messages, snaps] = await Promise.all([
       this.db.from("skill_profiles").select("*").maybeSingle(),
@@ -132,8 +282,10 @@ export class SupabaseRepository implements Repository {
     const pricingRow = check(pricing) as Row | null;
     const msgRows = check(messages) as Row[];
     const profileRow = check(await this.db.from("profiles").select("display_name").maybeSingle()) as Row | null;
+    const retention = await this.loadRetention();
 
     return {
+      ...retention,
       profile: spRow
         ? {
             id: spRow.id as string,
@@ -320,6 +472,8 @@ export class SupabaseRepository implements Repository {
   }
 
   async reset() {
+    if (this.retentionLocal) localStorage.removeItem(this.retentionKey);
+    else for (const t of ["xp_transactions", "weekly_missions"]) check(await this.db.from(t).delete().eq("user_id", this.userId));
     for (const t of [
       "roleplay_messages",
       "roleplay_sessions",

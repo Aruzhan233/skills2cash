@@ -18,9 +18,9 @@ export function GuestPaywall({ feature, children }: { feature: string; children?
         <p className="mt-2 text-sm text-ink-2">Upgrade for all 7 scenarios, all missions, Full Readiness, extended recommendations and full product access.</p>
         <p className="mt-4 text-2xl font-bold">Skills2Cash Pro — $19/month</p>
         <div className="mt-5 flex flex-wrap justify-center gap-2">
-          <Link href="/pricing"><Button>Upgrade to Pro</Button></Link>
+          <Link href="/subscription"><Button>Upgrade to Pro</Button></Link>
           <Link href="/dashboard"><Button variant="secondary">Back to Dashboard</Button></Link>
-          <Link href="/pricing" className="self-center text-sm text-violet-soft underline">View Pricing</Link>
+          <Link href="/subscription" className="self-center text-sm text-violet-soft underline">Compare plans</Link>
         </div>
         <p className="mt-3 text-xs text-muted">Create an account to start secure Stripe Checkout. Your guest progress remains saved here.</p>
       </Card>

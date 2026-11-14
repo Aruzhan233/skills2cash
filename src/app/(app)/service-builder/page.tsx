@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { Check, MessagesSquare, Sparkles } from "lucide-react";
 import { RequireProfile } from "@/components/require-profile";
@@ -219,6 +220,15 @@ function Builder() {
                 <button className="mt-2 text-xs text-violet-soft hover:underline" onClick={() => set("priceAmount", String(standard.price))}>
                   Use Standard package price from Pricing Builder (${standard.price})
                 </button>
+              )}
+              {!standard && (
+                <p className="mt-2 text-xs text-muted">
+                  Not sure what to charge?{" "}
+                  <Link href="/service-builder/pricing" className="font-medium text-violet-soft hover:underline">
+                    Work it out in the Pricing Builder
+                  </Link>{" "}
+                  — save your offer first so your edits are kept.
+                </p>
               )}
               <Field label={LABELS.priceRationale.label} hint={LABELS.priceRationale.hint} htmlFor="priceRationale" error={errors.priceRationale} className="mt-3">
                 <Textarea id="priceRationale" rows={3} value={draft.priceRationale} onChange={(e) => set("priceRationale", e.target.value)} />

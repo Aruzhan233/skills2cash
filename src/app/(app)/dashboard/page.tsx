@@ -1,13 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, BadgeDollarSign, ClipboardList, Hammer, MessagesSquare } from "lucide-react";
+import { ArrowRight, CalendarClock, CheckCircle2, Sparkles, Target } from "lucide-react";
+import { AchievementsList } from "@/components/achievements";
+import { JourneyStrip } from "@/components/journey-tracker";
+import { LevelCard } from "@/components/level-card";
+import { LogoMark } from "@/components/logo";
 import { RequireProfile } from "@/components/require-profile";
 import { Badge, Card, CardTitle, LinkButton, Progress, ScorePill, SourceBadge } from "@/components/ui";
 import { useWorkspace } from "@/components/workspace";
 import { ASSIGNMENT_BY_KEY } from "@/lib/assignments";
 import { formatDateTime } from "@/lib/cn";
-import { competencyScores, completedSessions, computeReadiness, currentStage, recommendNext, stageProgress } from "@/lib/progress";
+import { currentPhase, daysLeft, journeyPercent, journeyPhases, levelFor, totalXp, weeklyStats } from "@/lib/retention";
+import { achievements, competencyScores, completedSessions, computeReadiness, currentStage, recommendNext, stageProgress } from "@/lib/progress";
 import { SCENARIO_BY_KEY } from "@/lib/scenarios";
 import { STAGE_BY_KEY, STAGES } from "@/lib/stages";
 import { PlanUsage } from "@/components/plan-usage";
@@ -45,14 +50,33 @@ function Dashboard() {
     .sort((a, b) => b.at.localeCompare(a.at))
     .slice(0, 6);
 
+  const phases = journeyPhases(state);
+  const journey = journeyPercent(phases);
+  const phase = currentPhase(phases);
+  const level = levelFor(totalXp(state.xp));
+  const week = weeklyStats(state);
+  const weekLeft = week.missions[0] ? daysLeft(week.missions[0].deadline, new Date()) : 0;
+  const allAchievements = achievements(state);
+  const earnedCount = allAchievements.filter((a) => a.earned).length;
+  const recentAchievements = allAchievements
+    .filter((a) => a.earned)
+    .sort((a, b) => (b.earnedAt ?? "").localeCompare(a.earnedAt ?? ""))
+    .slice(0, 3);
+
   return (
     <div>
-      <div className="mb-6">
-        <p className="text-sm text-muted">{mode === "demo" ? "Demo workspace" : "Welcome back"}</p>
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Hi {p.displayName.split(" ")[0]} 👋</h1>
-        <p className="mt-1 text-sm text-ink-2">
-          Focus: <span className="text-ink">{state.offer?.title ?? p.direction.name}</span>
-        </p>
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex items-center gap-4">
+          <LogoMark size={56} priority className="hidden drop-shadow-[0_0_18px_rgba(139,92,246,0.45)] sm:block" />
+          <div>
+            <p className="text-sm text-muted">{mode === "demo" ? "Demo workspace" : "Welcome back"}</p>
+            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Hi {p.displayName.split(" ")[0]} 👋</h1>
+            <p className="mt-1 text-sm text-ink-2">
+              Focus: <span className="text-ink">{state.offer?.title ?? p.direction.name}</span>
+            </p>
+          </div>
+        </div>
+        <LevelCard level={level} href="/progress#achievements" className="lg:w-[340px]" />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -80,10 +104,72 @@ function Dashboard() {
         </Card>
       </div>
 
+      <Card className="mt-4">
+        <CardTitle
+          sub={`You are in phase ${phase.number} of ${phases.length}: ${phase.title} — ${phase.done} of ${phase.total} steps done`}
+          right={<Link href="/progress" className="shrink-0 text-sm text-violet-soft hover:underline">Open progress tracker</Link>}
+        >
+          Your monetization journey · {journey}% complete
+        </CardTitle>
+        <Progress value={journey} className="mb-4 h-2.5" label="Overall journey progress" />
+        <JourneyStrip phases={phases} currentKey={phase.key} />
+      </Card>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        <Card className="min-w-0 lg:col-span-2">
+          <CardTitle
+            sub={
+              week.total
+                ? `${week.completed} of ${week.total} done · ${week.xpEarned} of ${week.xpAvailable} XP · ${weekLeft} day${weekLeft === 1 ? "" : "s"} left`
+                : "Your missions for this week are being prepared"
+            }
+            right={<Link href="/assignments/weekly" className="shrink-0 text-sm text-violet-soft hover:underline">Open missions</Link>}
+          >
+            Weekly missions
+          </CardTitle>
+          {week.total > 0 && <Progress value={week.percent} className="mb-3" tone={week.completed === week.total ? "good" : "violet"} label="Weekly mission progress" />}
+          <ul className="space-y-2">
+            {week.missions.map((m) => (
+              <li key={m.id}>
+                <Link href="/assignments/weekly" className="flex items-center gap-3 rounded-xl border border-line bg-surface-2 p-3 text-sm hover:border-violet/40">
+                  {m.status === "completed" ? (
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-good" aria-label="Completed" />
+                  ) : (
+                    <Target className="h-4 w-4 shrink-0 text-violet-soft" aria-label="To do" />
+                  )}
+                  <span className={m.status === "completed" ? "min-w-0 flex-1 truncate text-muted line-through decoration-muted/40" : "min-w-0 flex-1 truncate"}>{m.title}</span>
+                  <Badge tone={m.status === "completed" ? "good" : "violet"}>
+                    <Sparkles className="h-3 w-3" aria-hidden /> {m.xp} XP
+                  </Badge>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          {week.streak > 0 && (
+            <p className="mt-3 flex items-center gap-1.5 text-xs text-muted">
+              <CalendarClock className="h-3.5 w-3.5" aria-hidden /> {week.streak}-week streak
+            </p>
+          )}
+        </Card>
+        <Card className="min-w-0">
+          <CardTitle
+            sub={`${earnedCount} of ${allAchievements.length} unlocked`}
+            right={<Link href="/progress#achievements" className="shrink-0 text-sm text-violet-soft hover:underline">View all</Link>}
+          >
+            Achievements
+          </CardTitle>
+          {recentAchievements.length ? (
+            <AchievementsList items={recentAchievements} compact />
+          ) : (
+            <p className="text-sm text-muted">No achievements yet. Your first mission or simulation will earn one.</p>
+          )}
+        </Card>
+      </div>
+
       <PlanUsage />
 
       <Card className="mt-4">
-        <CardTitle sub={`Current stage: ${stage.title} — ${stage.tagline}`}>Learning path</CardTitle>
+        <CardTitle sub={`Current stage: ${stage.title} — ${stage.tagline}`} right={<Link href="/path" className="text-sm text-violet-soft hover:underline">Open path</Link>}>Learning path</CardTitle>
         <ol className="grid gap-2 sm:grid-cols-5">
           {STAGES.map((s) => {
             const sp = prog.find((x) => x.key === s.key)!;
@@ -107,8 +193,8 @@ function Dashboard() {
         </ol>
       </Card>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-3">
-        <Card>
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <Card className="min-w-0">
           <CardTitle sub="Top competencies">Skill overview</CardTitle>
           <ul className="space-y-3">
             {scores.slice(0, 9).map((s) => (
@@ -128,7 +214,7 @@ function Dashboard() {
             <SourceBadge source="self-reported" />
           </div>
         </Card>
-        <Card>
+        <Card className="min-w-0">
           <CardTitle>Recent activity</CardTitle>
           {activity.length ? (
             <ul className="space-y-2">
@@ -147,23 +233,6 @@ function Dashboard() {
           ) : (
             <p className="text-sm text-muted">No missions or simulations yet. Your first one will show up here.</p>
           )}
-        </Card>
-        <Card>
-          <CardTitle>Tools</CardTitle>
-          <div className="grid gap-2">
-            {[
-              { href: "/service-builder", icon: Hammer, label: "Service Builder", done: !!state.offer },
-              { href: "/pricing", icon: BadgeDollarSign, label: "Pricing Builder", done: !!state.pricing },
-              { href: "/practice", icon: MessagesSquare, label: "AI Client Simulator", done: completedSessions(state.sessions).length > 0 },
-              { href: "/assignments", icon: ClipboardList, label: "Missions", done: state.submissions.length > 0 },
-            ].map((t) => (
-              <Link key={t.href} href={t.href} className="flex items-center gap-3 rounded-xl border border-line bg-surface-2 p-3 text-sm hover:border-violet/40">
-                <t.icon className="h-4 w-4 text-violet-soft" aria-hidden />
-                <span className="flex-1">{t.label}</span>
-                {t.done ? <Badge tone="good">Started</Badge> : <Badge>Not started</Badge>}
-              </Link>
-            ))}
-          </div>
         </Card>
       </div>
     </div>

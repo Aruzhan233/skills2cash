@@ -7,7 +7,8 @@ import { Card, CardTitle } from "./ui";
 import { getSupabase } from "@/lib/client/supabase";
 import { completedSessions } from "@/lib/progress";
 
-export function PlanUsage() {
+/** Current subscription plan, read from the owner-readable Supabase `subscriptions` table. */
+export function usePlan(): { plan: "free" | "pro"; subscriptionStatus: string } {
   const ws = useWorkspace();
   const [plan, setPlan] = useState<"free" | "pro">("free");
   const [subscriptionStatus, setSubscriptionStatus] = useState("free");
@@ -23,15 +24,23 @@ export function PlanUsage() {
     })();
     return () => { alive = false; };
   }, [ws.auth.status]);
-  const actualPlan = ws.guest ? "free" : plan;
+  return { plan: ws.guest ? "free" : plan, subscriptionStatus };
+}
+
+export function PlanUsage({ showPlansLink = true, className = "mt-4" }: { showPlansLink?: boolean; className?: string }) {
+  const ws = useWorkspace();
+  const { plan: actualPlan, subscriptionStatus } = usePlan();
   const usage = ws.guest ? ws.guestUsage : {
     assessments_used: ws.state.profile ? 1 : 0,
     offers_created: ws.state.offer ? 1 : 0,
     simulations_completed: completedSessions(ws.state.sessions).length,
   };
   return (
-    <Card className="mt-4">
-      <CardTitle sub={actualPlan === "pro" ? `Subscription status: ${subscriptionStatus}` : "Your Free plan usage"} right={<Link href="/pricing" className="text-sm text-violet-soft hover:underline">View plans</Link>}>
+    <Card className={className}>
+      <CardTitle
+        sub={actualPlan === "pro" ? `Subscription status: ${subscriptionStatus}` : "Your Free plan usage"}
+        right={showPlansLink ? <Link href="/subscription" className="text-sm text-violet-soft hover:underline">View plans</Link> : undefined}
+      >
         Current plan: {actualPlan === "pro" ? "Pro" : "Free"}
       </CardTitle>
       {actualPlan === "pro" ? <p className="text-sm text-ink-2">Unlimited assessments, offers, scenarios and missions.</p> : (

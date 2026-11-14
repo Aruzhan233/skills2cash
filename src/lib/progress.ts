@@ -216,7 +216,7 @@ export function stageProgress(state: WorkspaceState): StageProgress[] {
       missionReq("portfolio-case", best),
     ],
     price: [
-      { label: "Save a pricing worksheet", done: !!state.pricing, href: "/pricing" },
+      { label: "Save a pricing worksheet", done: !!state.pricing, href: "/service-builder/pricing" },
       missionReq("pricing-packages", best),
     ],
     practice: [
@@ -345,6 +345,8 @@ export interface Achievement {
   earned: boolean;
   earnedAt: string | null;
   href: string;
+  /** XP granted once, when the achievement is first unlocked. */
+  xp: number;
 }
 
 export function achievements(state: WorkspaceState): Achievement[] {
@@ -368,6 +370,20 @@ export function achievements(state: WorkspaceState): Achievement[] {
   const lastSnap = state.snapshots[state.snapshots.length - 1];
   const allMissions = ASSIGNMENTS.every((a) => passedSubs.some((s) => s.assignmentKey === a.key));
 
+  const passedAt = (key: string) => passedSubs.find((s) => s.assignmentKey === key)?.createdAt ?? null;
+  const latest = (...xs: Array<string | null | undefined>) => (xs.every(Boolean) ? (xs as string[]).sort().at(-1)! : null);
+  const commercialSkills = state.profile?.result.identified_skills.filter((k) => k.commercial).length ?? 0;
+  const passedSim = sessions.find((s) => (s.overallScore ?? 0) >= PASS_SCORE);
+  const weeklyDone = (state.weeklyMissions ?? [])
+    .filter((m) => m.status === "completed" && m.completedAt)
+    .sort((a, b) => a.completedAt!.localeCompare(b.completedAt!));
+  const byWeek = new Map<string, typeof weeklyDone>();
+  for (const m of state.weeklyMissions ?? []) byWeek.set(m.weekStart, [...(byWeek.get(m.weekStart) ?? []), m]);
+  const fullWeeks = [...byWeek.values()]
+    .filter((ms) => ms.length > 0 && ms.every((m) => m.status === "completed" && m.completedAt))
+    .map((ms) => ms.map((m) => m.completedAt!).sort().at(-1)!)
+    .sort();
+
   const list: Array<Omit<Achievement, "earned">> = [
     {
       key: "assessment",
@@ -375,6 +391,7 @@ export function achievements(state: WorkspaceState): Achievement[] {
       description: "Finished the skill assessment.",
       earnedAt: state.profile?.createdAt ?? null,
       href: "/onboarding",
+      xp: 50,
     },
     {
       key: "first-offer",
@@ -382,6 +399,7 @@ export function achievements(state: WorkspaceState): Achievement[] {
       description: "Saved a service offer in the Service Builder.",
       earnedAt: state.offer?.updatedAt ?? null,
       href: "/service-builder",
+      xp: 75,
     },
     {
       key: "first-mission",
@@ -389,13 +407,15 @@ export function achievements(state: WorkspaceState): Achievement[] {
       description: `Scored ${PASS_SCORE}+ on any mission.`,
       earnedAt: passedSubs[0]?.createdAt ?? null,
       href: "/assignments",
+      xp: 75,
     },
     {
       key: "pricing",
       title: "Pricing Practice",
       description: `Saved a pricing worksheet and scored ${PASS_SCORE}+ on Mission 4.`,
       earnedAt: state.pricing && pricingSub ? pricingSub.createdAt : null,
-      href: "/pricing",
+      href: "/service-builder/pricing",
+      xp: 100,
     },
     {
       key: "first-simulation",
@@ -403,6 +423,7 @@ export function achievements(state: WorkspaceState): Achievement[] {
       description: "Completed and evaluated an AI client conversation.",
       earnedAt: sessions[0]?.endedAt ?? null,
       href: "/practice",
+      xp: 75,
     },
     {
       key: "objection",
@@ -410,6 +431,7 @@ export function achievements(state: WorkspaceState): Achievement[] {
       description: "Scored 4/5 or higher on objection handling in a simulation.",
       earnedAt: objectionSession?.endedAt ?? null,
       href: "/practice",
+      xp: 100,
     },
     {
       key: "improved",
@@ -417,6 +439,7 @@ export function achievements(state: WorkspaceState): Achievement[] {
       description: "Beat your previous score on the same scenario.",
       earnedAt: improved,
       href: "/practice",
+      xp: 75,
     },
     {
       key: "all-missions",
@@ -424,6 +447,7 @@ export function achievements(state: WorkspaceState): Achievement[] {
       description: `Scored ${PASS_SCORE}+ on all ${ASSIGNMENTS.length} missions.`,
       earnedAt: allMissions ? passedSubs[passedSubs.length - 1].createdAt : null,
       href: "/assignments",
+      xp: 250,
     },
     {
       key: "launch-ready",
@@ -431,6 +455,71 @@ export function achievements(state: WorkspaceState): Achievement[] {
       description: "Readiness 70+ with evidence in at least 4 of 7 dimensions.",
       earnedAt: launchReady ? (lastSnap?.createdAt ?? new Date().toISOString()) : null,
       href: "/readiness",
+      xp: 300,
+    },
+    {
+      key: "skill-explorer",
+      title: "Skill Explorer",
+      description: "Your assessment identified three or more monetizable skills.",
+      earnedAt: commercialSkills >= 3 ? (state.profile?.createdAt ?? null) : null,
+      href: "/profile/skills",
+      xp: 50,
+    },
+    {
+      key: "market-researcher",
+      title: "Market Researcher",
+      description: `Scored ${PASS_SCORE}+ on both customer research missions (2 and 3).`,
+      earnedAt: latest(passedAt("target-customer"), passedAt("customer-problem")),
+      href: "/assignments/target-customer",
+      xp: 100,
+    },
+    {
+      key: "first-portfolio",
+      title: "First Portfolio",
+      description: `Scored ${PASS_SCORE}+ on the portfolio project mission.`,
+      earnedAt: passedAt("portfolio-case"),
+      href: "/assignments/portfolio-case",
+      xp: 100,
+    },
+    {
+      key: "practice-champion",
+      title: "Practice Champion",
+      description: "Completed five AI client simulations.",
+      earnedAt: sessions.length >= 5 ? (sessions[4].endedAt ?? sessions[4].startedAt) : null,
+      href: "/practice",
+      xp: 150,
+    },
+    {
+      key: "sales-ready",
+      title: "Sales Ready",
+      description: `Scored ${PASS_SCORE}+ in a simulation and on the objection-reply and pitch missions.`,
+      earnedAt: latest(passedSim ? (passedSim.endedAt ?? passedSim.startedAt) : null, passedAt("objection-reply"), passedAt("pitch")),
+      href: "/practice",
+      xp: 200,
+    },
+    {
+      key: "weekly-first",
+      title: "Weekly Starter",
+      description: "Completed your first weekly mission.",
+      earnedAt: weeklyDone[0]?.completedAt ?? null,
+      href: "/assignments/weekly",
+      xp: 50,
+    },
+    {
+      key: "weekly-full",
+      title: "Full Week",
+      description: "Completed every weekly mission in a single week.",
+      earnedAt: fullWeeks[0] ?? null,
+      href: "/assignments/weekly",
+      xp: 100,
+    },
+    {
+      key: "weekly-ten",
+      title: "Consistent Earner-in-Training",
+      description: "Completed ten weekly missions in total.",
+      earnedAt: weeklyDone.length >= 10 ? weeklyDone[9].completedAt : null,
+      href: "/assignments/weekly",
+      xp: 200,
     },
   ];
   return list.map((a) => ({ ...a, earned: a.earnedAt !== null }));

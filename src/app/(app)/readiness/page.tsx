@@ -5,10 +5,12 @@ import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YA
 import { AlertTriangle } from "lucide-react";
 import { RequireProfile } from "@/components/require-profile";
 import { GuestPaywall } from "@/components/guest-paywall";
+import { JourneyList } from "@/components/journey-list";
 import { Badge, Card, CardTitle, LinkButton, PageHeader, Progress, ScorePill } from "@/components/ui";
 import { useWorkspace } from "@/components/workspace";
 import { ASSIGNMENTS } from "@/lib/assignments";
 import { formatDate } from "@/lib/cn";
+import { journeyProgress } from "@/lib/journey";
 import { bestScoreByKey, collectEvidence, computeReadiness, PASS_SCORE, READINESS_DEFS, READINESS_MIN_DIMENSIONS, recommendNext } from "@/lib/progress";
 import { READINESS_KEYS } from "@/lib/types";
 
@@ -129,6 +131,11 @@ function Readiness() {
           </LinkButton>
         </Card>
       </div>
+
+      <Card className="mt-4">
+        <CardTitle sub="What stands between you and approaching real clients. Nothing here is locked — work on steps in any order.">Launch checklist</CardTitle>
+        <JourneyList progress={journeyProgress(state)} />
+      </Card>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <Card>

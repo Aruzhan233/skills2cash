@@ -66,7 +66,7 @@ export function AuthForm({ kind }: { kind: "login" | "signup" }) {
   return (
     <div className="bg-grid flex min-h-screen flex-col items-center justify-center px-4 py-12">
       <div className="mb-8">
-        <Logo />
+        <Logo size={40} />
       </div>
       <Card className="w-full max-w-md p-6">
         <h1 className="text-xl font-bold">{title}</h1>

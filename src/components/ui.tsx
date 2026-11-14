@@ -7,6 +7,7 @@ import { AlertTriangle, Bot, CheckCircle2, FlaskConical, Loader2, RotateCcw, Use
 import { cn } from "@/lib/cn";
 
 import { buttonClass, type Size, type Variant } from "./button-class";
+import { LogoMark } from "./logo";
 
 export { buttonClass };
 
@@ -43,36 +44,34 @@ export function LinkButton({
 }
 
 export function Card({ className, children, as: As = "section" }: { className?: string; children: ReactNode; as?: "section" | "div" | "article" }) {
-  return <As className={cn("rounded-2xl border border-line bg-surface p-5", className)}>{children}</As>;
+  return <As className={cn("rounded-2xl border border-line bg-surface p-5 sm:p-6", className)}>{children}</As>;
 }
 
 export function CardTitle({ children, sub, right }: { children: ReactNode; sub?: ReactNode; right?: ReactNode }) {
   return (
     <div className="mb-4 flex items-start justify-between gap-3">
-      <div>
-        <h2 className="text-base font-semibold text-ink">{children}</h2>
-        {sub && <p className="mt-0.5 text-sm text-muted">{sub}</p>}
+      <div className="min-w-0">
+        <h2 className="text-base font-semibold leading-snug text-ink">{children}</h2>
+        {sub && <p className="mt-1 text-sm text-muted">{sub}</p>}
       </div>
       {right}
     </div>
   );
 }
 
-type Tone = "neutral" | "violet" | "good" | "warn" | "bad";
+type Tone = "neutral" | "violet" | "good" | "warn" | "bad" | "spark";
 const tones: Record<Tone, string> = {
-  neutral: "bg-surface-3 text-ink-2 border-line-strong",
-  violet: "bg-violet-tint text-violet-soft border-violet/30",
-  good: "bg-good/10 text-good border-good/25",
-  warn: "bg-warn/10 text-warn border-warn/25",
-  bad: "bg-bad/10 text-bad border-bad/25",
+  neutral: "bg-surface-3 text-ink-2",
+  violet: "bg-violet-tint text-violet-soft",
+  good: "bg-good/10 text-good",
+  warn: "bg-warn/10 text-warn",
+  bad: "bg-bad/10 text-bad",
+  spark: "bg-spark/10 text-spark",
 };
 
 export function Badge({ tone = "neutral", children, className, title }: { tone?: Tone; children: ReactNode; className?: string; title?: string }) {
   return (
-    <span
-      title={title}
-      className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap", tones[tone], className)}
-    >
+    <span title={title} className={cn("inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-medium whitespace-nowrap", tones[tone], className)}>
       {children}
     </span>
   );
@@ -110,19 +109,19 @@ export function GeneratedBadge({ by }: { by: "ai" | "sample" | null | undefined 
   );
 }
 
-export function Progress({ value, className, tone = "violet", label }: { value: number | null; className?: string; tone?: "violet" | "muted" | "good"; label?: string }) {
+export function Progress({ value, className, tone = "violet", label }: { value: number | null; className?: string; tone?: "violet" | "muted" | "good" | "spark"; label?: string }) {
   const v = value === null ? 0 : Math.max(0, Math.min(100, value));
-  const color = tone === "violet" ? "bg-gradient-to-r from-violet to-violet-soft" : tone === "good" ? "bg-good" : "bg-ink-2/40";
+  const color = tone === "violet" ? "bg-violet" : tone === "good" ? "bg-good" : tone === "spark" ? "bg-spark" : "bg-ink-2/40";
   return (
     <div
-      className={cn("h-2 w-full overflow-hidden rounded-full bg-surface-3", className)}
+      className={cn("h-1.5 w-full overflow-hidden rounded-full bg-surface-3", className)}
       role="progressbar"
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={value ?? undefined}
       aria-label={label}
     >
-      <div className={cn("h-full rounded-full transition-all", color, value === null && "opacity-0")} style={{ width: `${v}%` }} />
+      <div className={cn("h-full rounded-full transition-[width] duration-500 ease-out-expo", color, value === null && "opacity-0")} style={{ width: `${v}%` }} />
     </div>
   );
 }
@@ -137,7 +136,8 @@ export function Spinner({ label = "Loading…" }: { label?: string }) {
 
 export function PageLoader({ label }: { label?: string }) {
   return (
-    <div className="flex min-h-[40vh] items-center justify-center">
+    <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4">
+      <LogoMark size={48} priority className="animate-pulse" />
       <Spinner label={label} />
     </div>
   );
@@ -157,7 +157,7 @@ export function ErrorState({
   children?: ReactNode;
 }) {
   return (
-    <div role="alert" className="rounded-xl border border-bad/30 bg-bad/5 p-4">
+    <div role="alert" className="rounded-xl bg-bad/10 p-4">
       <div className="flex items-start gap-3">
         <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-bad" aria-hidden />
         <div className="min-w-0 flex-1">
@@ -181,9 +181,9 @@ export function ErrorState({
 
 export function EmptyState({ icon, title, text, action }: { icon?: ReactNode; title: string; text: string; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center rounded-2xl border border-dashed border-line-strong bg-surface/60 px-6 py-10 text-center">
-      {icon && <div className="mb-3 text-violet-soft">{icon}</div>}
-      <p className="font-medium text-ink">{title}</p>
+    <div className="flex flex-col items-center rounded-2xl border border-dashed border-line-strong px-6 py-14 text-center">
+      {icon && <div className="mb-4 text-violet-soft">{icon}</div>}
+      <p className="text-lg font-semibold text-ink">{title}</p>
       <p className="mt-1 max-w-md text-sm text-muted">{text}</p>
       {action && <div className="mt-4">{action}</div>}
     </div>
@@ -191,11 +191,11 @@ export function EmptyState({ icon, title, text, action }: { icon?: ReactNode; ti
 }
 
 export function Notice({ tone = "violet", children, className }: { tone?: Tone; children: ReactNode; className?: string }) {
-  return <div className={cn("rounded-xl border px-4 py-3 text-sm", tones[tone], className)}>{children}</div>;
+  return <div className={cn("rounded-xl px-4 py-3 text-sm", tones[tone], className)}>{children}</div>;
 }
 
 const fieldBase =
-  "w-full rounded-lg border border-line-strong bg-surface-2 px-3 py-2 text-sm text-ink placeholder:text-muted/70 focus:border-violet focus:outline-none focus:ring-2 focus:ring-violet/30 disabled:opacity-60";
+  "w-full rounded-lg border border-line-strong bg-surface-2 px-3 py-2 text-sm text-ink transition-colors duration-150 placeholder:text-muted hover:border-muted/60 focus:border-violet focus:outline-none focus:ring-2 focus:ring-violet/30 disabled:opacity-60";
 
 export function Field({
   label,
@@ -214,7 +214,7 @@ export function Field({
 }) {
   return (
     <div className={className}>
-      <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-ink-2">
+      <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-ink">
         {label}
       </label>
       {children}
@@ -245,13 +245,14 @@ export function Select({ className, ...rest }: React.SelectHTMLAttributes<HTMLSe
 
 export function PageHeader({ title, sub, right, eyebrow }: { title: string; sub?: ReactNode; right?: ReactNode; eyebrow?: ReactNode }) {
   return (
-    <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div>
-        {eyebrow && <div className="mb-2">{eyebrow}</div>}
-        <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">{title}</h1>
-        {sub && <p className="mt-1.5 max-w-2xl text-sm text-muted">{sub}</p>}
+    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="min-w-0">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-[1.75rem] sm:leading-9">{title}</h1>
+        {sub && <p className="mt-2 max-w-[68ch] text-sm leading-relaxed text-muted">{sub}</p>}
+        {/* `eyebrow` is page meta (week, disclaimers); it follows the title rather than sitting above it */}
+        {eyebrow && <div className="mt-3">{eyebrow}</div>}
       </div>
-      {right && <div className="flex flex-wrap gap-2">{right}</div>}
+      {right && <div className="flex shrink-0 flex-wrap gap-2">{right}</div>}
     </div>
   );
 }

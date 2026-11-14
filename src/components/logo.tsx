@@ -1,11 +1,18 @@
+import Image from "next/image";
 import Link from "next/link";
+import { cn } from "@/lib/cn";
 
-export function Logo({ href = "/" }: { href?: string }) {
+const LOGO_SRC = "/brand/skills2cash-logo.png";
+
+/** The official Skills2Cash mark (transparent PNG cut from the original artwork, unmodified). */
+export function LogoMark({ size = 30, className, priority }: { size?: number; className?: string; priority?: boolean }) {
+  return <Image src={LOGO_SRC} alt="" width={size} height={size} priority={priority} className={cn("shrink-0 select-none", className)} />;
+}
+
+export function Logo({ href = "/", size = 30 }: { href?: string; size?: number }) {
   return (
     <Link href={href} className="flex items-center gap-2 font-semibold tracking-tight text-ink" aria-label="Skills2Cash home">
-      <span className="grid h-7 w-7 place-items-center rounded-lg bg-gradient-to-br from-violet to-violet-strong text-[13px] font-black text-white">
-        S2
-      </span>
+      <LogoMark size={size} priority />
       <span className="text-[15px]">
         Skills<span className="text-violet-soft">2</span>Cash
       </span>

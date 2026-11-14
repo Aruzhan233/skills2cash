@@ -103,7 +103,7 @@ function Library() {
             </div>
             <div className="mt-auto pt-4">
               {ws.guest && ws.guestUsage.simulations_completed >= 1 ? (
-                <LinkButton href="/pricing" variant="secondary" className="w-full">Free simulation used · View Pro</LinkButton>
+                <LinkButton href="/subscription" variant="secondary" className="w-full">Free simulation used · View Pro</LinkButton>
               ) : (
                 <LinkButton href={`/practice/${s.key}`} className="w-full">
                   <MessagesSquare className="h-4 w-4" aria-hidden /> Start

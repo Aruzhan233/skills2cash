@@ -1,27 +1,79 @@
 @import "tailwindcss";
 
+/*
+ * Skills2Cash design tokens — "The Night Workshop".
+ * Violet is the one lamp (action, current step, selection).
+ * Spark is the logo's gold and means "earned" (XP, achievements).
+ * Good / warn / bad are status only.
+ */
 @theme {
-  --color-bg: #07070b;
-  --color-surface: #0e0e15;
-  --color-surface-2: #14141d;
-  --color-surface-3: #1b1b26;
-  --color-line: #262633;
-  --color-line-strong: #34344a;
-  --color-ink: #f4f4f8;
-  --color-ink-2: #c9c9d6;
-  --color-muted: #9a9ab0;
+  /* ground and surfaces: violet-tinted charcoal, four tonal steps */
+  --color-bg: #0a0910;
+  --color-rail: #0d0b16;
+  --color-surface: #121019;
+  --color-surface-2: #181621;
+  --color-surface-3: #211f2c;
+  --color-line: #221f2e;
+  --color-line-strong: #353143;
+
+  /* text */
+  --color-ink: #f4f2f9;
+  --color-ink-2: #c8c4d6;
+  --color-muted: #9690aa;
+
+  /* the lamp */
   --color-violet: #8b5cf6;
   --color-violet-strong: #7c3aed;
+  --color-violet-deep: #6d28d9;
   --color-violet-soft: #c4b5fd;
-  --color-violet-tint: #1e1730;
-  --color-good: #34d399;
-  --color-warn: #fbbf24;
+  --color-violet-tint: #1d1633;
+
+  /* earned */
+  --color-spark: #f2be6a;
+
+  /* status */
+  --color-good: #3fcf8e;
+  --color-warn: #fb923c;
   --color-bad: #f87171;
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* tighter corners than Tailwind's defaults: 12px panels, 10px tiles */
+  --radius-xl: 0.625rem;
+  --radius-2xl: 0.75rem;
+
+  /* depth: only floating layers cast a shadow, always with an offset */
+  --shadow-float: 0 12px 32px -8px rgb(0 0 0 / 0.6), 0 2px 6px -2px rgb(0 0 0 / 0.5);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-toast-in: toast-in 320ms var(--ease-out-expo);
+  --animate-fade-in: fade-in 180ms ease-out;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 :root {
   color-scheme: dark;
+  scrollbar-color: var(--color-line-strong) transparent;
 }
 
 html,
@@ -30,14 +82,24 @@ body {
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   min-height: 100vh;
+  font-variant-numeric: tabular-nums;
+  caret-color: var(--color-violet-soft);
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
 }
 
 ::selection {
-  background: #8b5cf655;
+  background: #7c3aed80;
+  color: var(--color-ink);
 }
 
 :focus-visible {
@@ -46,15 +108,18 @@ body {
   border-radius: 6px;
 }
 
-.bg-grid {
-  background-image:
-    radial-gradient(ellipse 60% 50% at 50% 0%, #8b5cf622, transparent 70%),
-    linear-gradient(to right, #ffffff08 1px, transparent 1px),
-    linear-gradient(to bottom, #ffffff08 1px, transparent 1px);
-  background-size:
-    100% 100%,
-    48px 48px,
-    48px 48px;
+a {
+  text-underline-offset: 3px;
+}
+
+::placeholder {
+  color: var(--color-muted);
+  opacity: 1;
+}
+
+/* Persuade surfaces: a single soft violet light from the top of the page. */
+.lamp {
+  background: radial-gradient(ellipse 70% 55% at 50% -10%, #7c3aed38, transparent 70%);
 }
 
 .scrollbar-none::-webkit-scrollbar {
