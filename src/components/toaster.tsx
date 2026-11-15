@@ -18,11 +18,11 @@ function ToastCard({ toast, onClose }: { toast: Toast; onClose: () => void }) {
     <div
       role={warn ? "alert" : "status"}
       className={cn(
-        "pointer-events-auto flex w-full items-start gap-3 rounded-xl border bg-surface-2 p-3 shadow-2xl",
-        warn ? "border-warn/40" : "border-violet/40 shadow-[0_0_30px_rgba(139,92,246,0.18)]",
+        "glass-float pointer-events-auto flex w-full animate-toast-in items-start gap-3 rounded-2xl p-3",
+        warn ? "border-warn/40" : "border-spark/35",
       )}
     >
-      <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-lg", warn ? "bg-warn/10 text-warn" : "bg-gradient-to-br from-violet to-violet-strong text-white")}>
+      <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-lg", warn ? "bg-warn/10 text-warn" : "animate-unlock bg-spark/15 text-spark")}>
         <Icon className="h-4 w-4" aria-hidden />
       </span>
       <div className="min-w-0 flex-1">

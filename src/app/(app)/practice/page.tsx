@@ -3,16 +3,17 @@
 import Link from "next/link";
 import { useState } from "react";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { CHART, chartTick, chartTooltipStyle } from "@/lib/chart-theme";
 import { Hammer, MessagesSquare } from "lucide-react";
 import { RequireProfile } from "@/components/require-profile";
 import { Badge, Card, CardTitle, EmptyState, LinkButton, PageHeader, ScorePill } from "@/components/ui";
 import { useWorkspace } from "@/components/workspace";
 import { cn, formatDate, formatDateTime } from "@/lib/cn";
-import { completedSessions } from "@/lib/progress";
+import { completedSessions, recommendNext } from "@/lib/progress";
 import { SCENARIOS, SCENARIO_BY_KEY, type Difficulty } from "@/lib/scenarios";
 import { COMPETENCIES } from "@/lib/competencies";
 
-const DIFF_TONE: Record<Difficulty, "good" | "violet" | "warn"> = { Beginner: "good", Intermediate: "violet", Advanced: "warn" };
+const DIFF_TONE: Record<Difficulty, "neutral"> = { Beginner: "neutral", Intermediate: "neutral", Advanced: "neutral" };
 
 export default function PracticePage() {
   return (
@@ -26,6 +27,8 @@ function Library() {
   const ws = useWorkspace();
   const { state } = ws;
   const [filter, setFilter] = useState<Difficulty | "All">("All");
+  const recHref = recommendNext(state).href;
+  const recKey = recHref.startsWith("/practice/") && !recHref.startsWith("/practice/session/") ? recHref.split("/")[2] : null;
   const done = completedSessions(state.sessions);
   const active = state.sessions.filter((s) => s.status === "active" && s.messages.some((m) => m.role === "user"));
   const chart = done.map((s, i) => ({ n: i + 1, score: s.overallScore, label: `${SCENARIO_BY_KEY[s.scenarioKey]?.title} · ${formatDate(s.endedAt)}` }));
@@ -54,7 +57,7 @@ function Library() {
       />
 
       {active.length > 0 && (
-        <Card className="mb-4 border-violet/40">
+        <Card className="mb-6 border-violet/40">
           <CardTitle sub="Saved automatically — pick up where you left off">Unfinished conversations</CardTitle>
           <ul className="space-y-2">
             {active.map((s) => (
@@ -78,8 +81,8 @@ function Library() {
             onClick={() => setFilter(d)}
             aria-pressed={filter === d}
             className={cn(
-              "rounded-full border px-3 py-1 text-sm",
-              filter === d ? "border-violet bg-violet-tint text-violet-soft" : "border-line-strong text-muted hover:text-ink",
+              "h-8 rounded-lg px-3 text-sm transition-colors duration-150",
+              filter === d ? "bg-violet-tint font-medium text-ink" : "text-muted hover:bg-surface-2 hover:text-ink",
             )}
           >
             {d}
@@ -89,24 +92,28 @@ function Library() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {SCENARIOS.filter((s) => filter === "All" || s.difficulty === filter).map((s) => (
-          <Card key={s.key} className="flex flex-col">
-            <div className="flex items-center justify-between gap-2">
-              <Badge tone={DIFF_TONE[s.difficulty]}>{s.difficulty}</Badge>
-              {bestBy[s.key] !== undefined && <span className="text-xs text-muted">Best: {bestBy[s.key]}/100</span>}
-            </div>
-            <h2 className="mt-3 font-semibold">{s.objectionLabel}</h2>
+          <Card key={s.key} className={cn("glass-hover flex flex-col", recKey === s.key && "border-violet/50 shadow-glow-lg")}>
+            <h2 className="font-semibold text-ink">{s.objectionLabel}</h2>
             <p className="mt-1 text-sm text-muted">{s.goal}</p>
-            <div className="mt-3 flex flex-wrap gap-1">
+            <div className="mt-3 flex flex-wrap items-center gap-1">
+              <Badge tone={DIFF_TONE[s.difficulty]}>{s.difficulty}</Badge>
               {s.competencies.map((c) => (
                 <Badge key={c}>{COMPETENCIES[c].short}</Badge>
               ))}
             </div>
+            {(recKey === s.key || bestBy[s.key] !== undefined) && (
+              <p className="mt-3 text-xs text-muted">
+                {recKey === s.key && <span className="font-medium text-violet-soft">Recommended for you</span>}
+                {recKey === s.key && bestBy[s.key] !== undefined && " · "}
+                {bestBy[s.key] !== undefined && `Your best: ${bestBy[s.key]}/100`}
+              </p>
+            )}
             <div className="mt-auto pt-4">
               {ws.guest && ws.guestUsage.simulations_completed >= 1 ? (
                 <LinkButton href="/subscription" variant="secondary" className="w-full">Free simulation used · View Pro</LinkButton>
               ) : (
-                <LinkButton href={`/practice/${s.key}`} className="w-full">
-                  <MessagesSquare className="h-4 w-4" aria-hidden /> Start
+                <LinkButton href={`/practice/${s.key}`} variant={recKey === s.key ? "primary" : "secondary"} className="w-full">
+                  <MessagesSquare className="h-4 w-4" aria-hidden /> {bestBy[s.key] !== undefined ? "Practise again" : "Start conversation"}
                 </LinkButton>
               )}
             </div>
@@ -123,7 +130,7 @@ function Library() {
                 <li key={s.id}>
                   <Link href={`/practice/session/${s.id}`} className="flex items-center justify-between gap-3 py-3 text-sm hover:text-violet-soft">
                     <span className="min-w-0">
-                      <span className="block truncate font-medium">{SCENARIO_BY_KEY[s.scenarioKey]?.title}</span>
+                      <span className="block truncate font-medium text-ink">{SCENARIO_BY_KEY[s.scenarioKey]?.title}</span>
                       <span className="text-xs text-muted">
                         {formatDateTime(s.endedAt)} · {s.messages.filter((m) => m.role === "user").length} of your messages
                         {s.evaluation?.generatedBy === "sample" ? " · offline sample" : ""}
@@ -144,14 +151,14 @@ function Library() {
             <div style={{ width: "100%", height: 220 }} role="img" aria-label={`Scores: ${chart.map((c) => c.score ?? "n/a").join(", ")}`}>
               <ResponsiveContainer>
                 <LineChart data={chart} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid stroke="#262633" vertical={false} />
-                  <XAxis dataKey="n" tick={{ fill: "#9a9ab0", fontSize: 11 }} tickLine={false} axisLine={{ stroke: "#34344a" }} />
-                  <YAxis domain={[0, 100]} tick={{ fill: "#9a9ab0", fontSize: 11 }} tickLine={false} axisLine={false} />
+                  <CartesianGrid stroke={CHART.grid} vertical={false} />
+                  <XAxis dataKey="n" tick={chartTick} tickLine={false} axisLine={{ stroke: CHART.axis }} />
+                  <YAxis domain={[0, 100]} tick={chartTick} tickLine={false} axisLine={false} />
                   <Tooltip
-                    contentStyle={{ background: "#14141d", border: "1px solid #34344a", borderRadius: 10, fontSize: 12 }}
+                    contentStyle={chartTooltipStyle}
                     labelFormatter={(_, p) => (p?.[0]?.payload as { label?: string } | undefined)?.label ?? ""}
                   />
-                  <Line type="monotone" dataKey="score" stroke="#a78bfa" strokeWidth={2} dot={{ r: 4, fill: "#8b5cf6" }} connectNulls />
+                  <Line type="monotone" dataKey="score" stroke={CHART.seriesSoft} strokeWidth={2} dot={{ r: 4, fill: CHART.series, stroke: CHART.surface, strokeWidth: 2 }} connectNulls />
                 </LineChart>
               </ResponsiveContainer>
             </div>

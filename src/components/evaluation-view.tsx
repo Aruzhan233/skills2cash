@@ -11,7 +11,7 @@ export function EvaluationView({ ev, retryHref }: { ev: Evaluation; retryHref: s
   const nextHref = ev.nextPractice.kind === "scenario" ? `/practice/${ev.nextPractice.key}` : `/assignments/${ev.nextPractice.key}`;
   return (
     <div className="space-y-4">
-      <Card className="border-violet/30">
+      <Card>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="mb-2 flex flex-wrap gap-2">
@@ -21,7 +21,7 @@ export function EvaluationView({ ev, retryHref }: { ev: Evaluation; retryHref: s
               </Badge>
             </div>
             <p className="text-sm text-muted">Overall score</p>
-            <p className="text-5xl font-bold">
+            <p className="text-5xl font-semibold tracking-tight text-ink">
               {ev.overallScore ?? "—"}
               <span className="text-lg font-normal text-muted">/100</span>
             </p>
@@ -55,8 +55,8 @@ export function EvaluationView({ ev, retryHref }: { ev: Evaluation; retryHref: s
               <li key={d.key} className="grid gap-2 py-3 sm:grid-cols-[220px_minmax(0,1fr)]">
                 <div>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-medium">{d.label}</span>
-                    <span className="font-mono text-sm">{r.score === null ? "n/a" : `${r.score}/5`}</span>
+                    <span className="text-sm font-medium text-ink">{d.label}</span>
+                    <span className="font-medium tabular-nums text-sm">{r.score === null ? "n/a" : `${r.score}/5`}</span>
                   </div>
                   <Progress value={r.score === null ? null : levelToPercent(r.score)} className="mt-1.5" label={d.label} />
                   {r.score === null && <p className="mt-1 text-xs text-warn">Not enough data to score</p>}
@@ -90,7 +90,7 @@ export function EvaluationView({ ev, retryHref }: { ev: Evaluation; retryHref: s
           )}
           {ev.mistakes.length > 0 && (
             <>
-              <p className="mt-4 text-sm font-semibold">Mistakes</p>
+              <h3 className="mt-5 text-sm font-medium text-ink">Mistakes</h3>
               <ul className="mt-1 list-disc space-y-1 pl-4 text-sm text-ink-2">
                 {ev.mistakes.map((s) => (
                   <li key={s}>{s}</li>
@@ -110,7 +110,7 @@ export function EvaluationView({ ev, retryHref }: { ev: Evaluation; retryHref: s
             ))}
           </ul>
         </Card>
-        <Card className="border-violet/30 bg-violet-tint/40">
+        <Card className="glass-lit">
           <CardTitle>Next exercise</CardTitle>
           <p className="font-medium">{ev.nextPractice.title}</p>
           <p className="mt-1 text-sm text-ink-2">{ev.nextPractice.reason}</p>
@@ -123,7 +123,7 @@ export function EvaluationView({ ev, retryHref }: { ev: Evaluation; retryHref: s
             </LinkButton>
           </div>
           <Link href="/readiness" className="mt-3 block text-xs text-violet-soft hover:underline">
-            See how this changed your readiness →
+            See how this changed your readiness <ArrowRight className="inline h-3.5 w-3.5" aria-hidden />
           </Link>
         </Card>
       </div>

@@ -10,7 +10,7 @@ import { Button, ErrorState, PageLoader } from "./ui";
 import { ASSIGNMENT_BY_KEY } from "@/lib/assignments";
 import { JOURNEY, journeyProgress, journeyStepForPath, nextAfter, type JourneyKey, type JourneyProgress } from "@/lib/journey";
 import { computeReadiness } from "@/lib/progress";
-import { levelFor, totalXp, type LevelInfo } from "@/lib/retention";
+import { journeyPercent, journeyPhases, levelFor, totalXp, type LevelInfo } from "@/lib/retention";
 import { SCENARIO_BY_KEY } from "@/lib/scenarios";
 import { Toaster } from "./toaster";
 import { cn } from "@/lib/cn";
@@ -22,15 +22,15 @@ function isActive(path: string, href: string) {
   return path === href || path.startsWith(`${href}/`);
 }
 
-/** Breadcrumb trail for the current page: Home › stage › sub-page. */
+/** Breadcrumb trail for the current page: Dashboard › stage › sub-page. ("Home" is the public site at /.) */
 function crumbsFor(path: string): Array<{ label: string; href?: string }> {
   const account = ACCOUNT_PAGES.find((a) => isActive(path, a.href));
   if (account) return [{ label: "Account" }, { label: account.label }];
-  if (isActive(path, "/progress")) return [{ label: "Home", href: "/dashboard" }, { label: "Progress tracker" }];
-  if (isActive(path, "/dashboard")) return [{ label: "Home" }];
+  if (isActive(path, "/progress")) return [{ label: "Dashboard", href: "/dashboard" }, { label: "Progress tracker" }];
+  if (isActive(path, "/dashboard")) return [{ label: "Dashboard" }];
   const step = journeyStepForPath(path);
   if (!step) return [];
-  const trail: Array<{ label: string; href?: string }> = [{ label: "Home", href: "/dashboard" }];
+  const trail: Array<{ label: string; href?: string }> = [{ label: "Dashboard", href: "/dashboard" }];
   let sub: string | null = null;
   if (path === "/onboarding") sub = "Skill assessment";
   else if (path === "/service-builder/pricing") sub = "Pricing Builder";
@@ -106,6 +106,7 @@ function JourneyRail({
   readiness,
   level,
   earned,
+  homeHref,
   onNavigate,
 }: {
   path: string;
@@ -113,22 +114,25 @@ function JourneyRail({
   readiness: number | null;
   level: LevelInfo | null;
   earned: number;
+  homeHref: string;
   onNavigate?: () => void;
 }) {
   const activeStep = journeyStepForPath(path);
+  const nextKey = progress ? JOURNEY.find((s) => progress[s.key].status !== "done")?.key : undefined;
   const item = (active: boolean) =>
     cn(
       "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors duration-150",
-      active ? "bg-violet-tint font-medium text-ink" : "text-ink-2 hover:bg-surface-2 hover:text-ink",
+      active ? "bg-[linear-gradient(90deg,rgb(120_43_255/0.3),rgb(120_43_255/0.05))] font-medium text-ink ring-1 ring-inset ring-violet/30" : "text-ink-2 hover:bg-surface-2 hover:text-ink",
     );
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-14 shrink-0 items-center px-5">
-        <Logo href="/dashboard" size={28} />
+        <Logo href="/" size={28} />
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 pb-4 pt-2" aria-label="Main">
-        <Link href="/dashboard" onClick={onNavigate} className={item(isActive(path, "/dashboard"))} aria-current={isActive(path, "/dashboard") ? "page" : undefined}>
+        {/* Home is the user's workspace; the logo above is the way back to the public site. */}
+        <Link href={homeHref} onClick={onNavigate} className={item(isActive(path, "/dashboard"))} aria-current={isActive(path, "/dashboard") ? "page" : undefined}>
           <Home className="h-4 w-4 shrink-0 text-muted" aria-hidden /> Home
         </Link>
 
@@ -142,7 +146,13 @@ function JourneyRail({
               <li key={s.key} className="relative">
                 {/* the path: violet where the step above it is complete */}
                 {i < JOURNEY.length - 1 && (
-                  <span className={cn("absolute left-[23px] top-[34px] h-[calc(100%-22px)] w-px", done ? "bg-violet/70" : "bg-line-strong")} aria-hidden />
+                  <span
+                    className={cn(
+                      "absolute left-[23px] top-[34px] h-[calc(100%-22px)] w-px transition-colors duration-500",
+                      done ? "bg-[linear-gradient(180deg,#c5a7ff,#782bff)] shadow-[0_0_8px_rgb(150_63_255/0.8)]" : "bg-line-strong",
+                    )}
+                    aria-hidden
+                  />
                 )}
                 <Link
                   href={s.href}
@@ -151,17 +161,19 @@ function JourneyRail({
                   title={`Step ${s.number}: ${s.phase}`}
                   className={cn(
                     "relative flex items-start gap-3 rounded-lg px-3 py-2 transition-colors duration-150",
-                    active ? "bg-violet-tint" : "hover:bg-surface-2",
+                    active ? "bg-[linear-gradient(90deg,rgb(120_43_255/0.3),rgb(120_43_255/0.05))] ring-1 ring-inset ring-violet/30" : "hover:bg-surface-2",
                   )}
                 >
                   <span
                     className={cn(
-                      "relative z-10 mt-0.5 grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full text-[0.6875rem] font-semibold",
+                      "relative z-10 mt-0.5 grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full text-xs font-semibold",
                       done
-                        ? "bg-violet text-white"
+                        ? "bg-[linear-gradient(180deg,#a45cff,#782bff)] text-white shadow-[0_2px_10px_rgb(150_63_255/0.6)]"
                         : active
-                          ? "bg-violet-strong text-white ring-4 ring-violet/20"
-                          : st === "in_progress"
+                          ? "bg-violet-strong text-white ring-4 ring-violet/25 shadow-[0_2px_12px_rgb(150_63_255/0.7)]"
+                          : s.key === nextKey
+                            ? "border border-violet bg-violet-tint text-violet-soft ring-4 ring-violet/15"
+                            : st === "in_progress"
                             ? "border border-violet/70 bg-rail text-violet-soft"
                             : "border border-line-strong bg-rail text-muted",
                     )}
@@ -170,7 +182,10 @@ function JourneyRail({
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center justify-between gap-2">
-                      <span className={cn("text-sm", active ? "font-medium text-ink" : done || st === "in_progress" ? "text-ink-2" : "text-muted")}>{s.label}</span>
+                      <span className={cn("text-sm", active ? "font-medium text-ink" : done || st === "in_progress" ? "text-ink-2" : "text-muted")}>
+                        {s.label}
+                        {s.key === nextKey && !active && <span className="ml-1.5 text-xs font-medium text-violet-soft">Next</span>}
+                      </span>
                       {s.key === "readiness" && readiness !== null && <span className="text-xs font-medium text-ink-2">{readiness}</span>}
                     </span>
                     {progress && <span className="block truncate text-xs text-muted">{progress[s.key].detail}</span>}
@@ -188,7 +203,7 @@ function JourneyRail({
           href="/progress"
           onClick={onNavigate}
           aria-current={isActive(path, "/progress") ? "page" : undefined}
-          className={cn("block rounded-lg px-3 py-2.5 transition-colors duration-150", isActive(path, "/progress") ? "bg-violet-tint" : "hover:bg-surface-2")}
+          className={cn("glass block rounded-xl px-3 py-3 transition-colors duration-150", isActive(path, "/progress") ? "ring-1 ring-inset ring-spark/30" : "hover:border-spark/30")}
         >
           {level ? (
             <>
@@ -198,8 +213,8 @@ function JourneyRail({
                   <Sparkles className="h-3 w-3" aria-hidden /> {level.xp} XP
                 </span>
               </span>
-              <span className="mt-2 block h-1 overflow-hidden rounded-full bg-surface-3" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={level.percent} aria-label="Progress to next level">
-                <span className="block h-full rounded-full bg-spark transition-[width] duration-500 ease-out-expo" style={{ width: `${level.percent}%` }} />
+              <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-white/[0.07]" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={level.percent} aria-label="Progress to next level">
+                <span className="block h-full rounded-full bg-[linear-gradient(90deg,#d99a3c,#f2be6a)] shadow-[0_0_10px_rgb(242_190_106/0.5)] transition-[width] duration-700 ease-out-expo" style={{ width: `${level.percent}%` }} />
               </span>
               <span className="mt-1.5 block text-xs text-muted">
                 {level.toNext} XP to level {level.level + 1} · {earned} achievement{earned === 1 ? "" : "s"}
@@ -239,15 +254,15 @@ function UserMenu() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-2 rounded-full bg-surface-2 py-1 pl-1 pr-1 text-sm transition-colors duration-150 hover:bg-surface-3 xl:pr-3"
+        className="flex items-center gap-2 rounded-full border border-line-strong bg-surface-2 py-1 pl-1 pr-1 text-sm backdrop-blur-md transition-colors duration-150 hover:bg-surface-3 xl:pr-3"
         aria-expanded={open}
         aria-haspopup="menu"
       >
-        <span className="grid h-7 w-7 place-items-center rounded-full bg-violet-tint text-xs font-semibold text-violet-soft">{initials || "U"}</span>
+        <span className="grid h-7 w-7 place-items-center rounded-full bg-[linear-gradient(135deg,#963fff,#321078)] text-xs font-semibold text-white">{initials || "U"}</span>
         <span className="hidden max-w-[120px] truncate text-ink-2 xl:block">{name}</span>
       </button>
       {open && (
-        <div role="menu" className="absolute right-0 z-50 mt-2 w-64 animate-fade-in rounded-xl border border-line-strong bg-surface-2 p-1.5 shadow-float">
+        <div role="menu" className="glass-float absolute right-0 z-50 mt-2 w-64 animate-fade-in rounded-2xl p-1.5">
           <div className="px-3 py-2 text-xs text-muted">
             {ws.mode === "demo" ? "Demo workspace (Alex)" : ws.auth.email ? `Signed in as ${ws.auth.email}` : "Local workspace"}
           </div>
@@ -342,7 +357,7 @@ function ModeBanner() {
           Guest workspace — progress is saved in this browser. {ws.auth.status === "signed_in" ? (
             <button disabled={busy} onClick={async () => { setBusy(true); setTransferError(""); try { await ws.migrateGuestData(); } catch (e) { setTransferError((e as Error).message); } finally { setBusy(false); } }} className="font-semibold text-violet-soft underline">{busy ? "Transferring…" : "Transfer progress to my account"}</button>
           ) : <Link href="/signup?next=%2Fdashboard" className="font-semibold text-violet-soft underline">Create an account to keep it</Link>}
-          {transferError && <span role="alert" className="basis-full text-danger">Transfer failed: {transferError} Your guest data is still saved here.</span>}
+          {transferError && <span role="alert" className="basis-full text-bad">Transfer failed: {transferError} Your guest data is still saved here.</span>}
         </div>
       </div>
     );
@@ -365,6 +380,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   const path = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileTop, setMobileTop] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const on = () => setMobileTop(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
 
   useEffect(() => {
     if (ws.status === "needs_auth") router.replace(`/login?next=${encodeURIComponent(path)}`);
@@ -385,17 +408,23 @@ export function AppShell({ children }: { children: ReactNode }) {
   const readiness = ready ? computeReadiness(ws.state).overall : null;
   const progress = ready ? journeyProgress(ws.state) : null;
   const level = ready && ws.state.profile ? levelFor(totalXp(ws.state.xp)) : null;
+  // Home goes to the workspace when there is one (account, guest, demo or local mode); otherwise to the public site.
+  const hasWorkspace = ws.auth.status === "signed_in" || ws.guest || ws.mode === "demo" || ws.storage === "local";
+  const homeHref = hasWorkspace ? "/dashboard" : "/";
+  // The horizon rises and brightens as the journey advances (0–100).
+  const lit = ready && ws.state.profile ? journeyPercent(journeyPhases(ws.state)) : 0;
   const earned = ready ? new Set(ws.state.xp.filter((t) => t.source === "achievement").map((t) => t.refKey)).size : 0;
-  const rail = (onNavigate?: () => void) => <JourneyRail path={path} progress={progress} readiness={readiness} level={level} earned={earned} onNavigate={onNavigate} />;
+  const rail = (onNavigate?: () => void) => <JourneyRail path={path} progress={progress} readiness={readiness} level={level} earned={earned} homeHref={homeHref} onNavigate={onNavigate} />;
 
   return (
-    <div className="min-h-screen lg:pl-[264px]">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[264px] border-r border-line bg-rail lg:block">{rail()}</aside>
+    <div className="relative min-h-screen lg:pl-[264px]">
+      <div className="sky" aria-hidden />
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[264px] border-r border-line bg-[linear-gradient(180deg,rgb(30_14_64/0.75),rgb(16_10_28/0.8)_40%)] backdrop-blur-xl lg:block">{rail()}</aside>
 
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <button className="absolute inset-0 animate-fade-in bg-black/60" aria-label="Close menu" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute inset-y-0 left-0 w-[min(288px,86vw)] animate-fade-in border-r border-line bg-rail shadow-float" aria-label="Navigation">
+          <button className="absolute inset-0 animate-fade-in bg-black/60 backdrop-blur-sm" aria-label="Close menu" onClick={() => setMobileOpen(false)} />
+          <aside className="glass-float absolute inset-y-0 left-0 w-[min(288px,86vw)] animate-fade-in rounded-none border-y-0 border-l-0" aria-label="Navigation">
             <button className="absolute right-3 top-3 z-10 rounded-lg p-2 text-ink-2 hover:bg-surface-3" onClick={() => setMobileOpen(false)} aria-label="Close menu">
               <X className="h-5 w-5" />
             </button>
@@ -404,7 +433,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       )}
 
-      <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-line bg-bg px-4 sm:px-6 lg:px-10">
+      <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-line bg-[rgb(8_6_13/0.55)] px-4 backdrop-blur-xl sm:px-6 lg:px-10">
         <button className="-ml-2 rounded-lg p-2 text-ink-2 hover:bg-surface-3 lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open menu" aria-expanded={mobileOpen}>
           <Menu className="h-5 w-5" />
         </button>
@@ -413,8 +442,17 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
         <UserMenu />
       </header>
-      <ModeBanner />
-      <main className="mx-auto max-w-[1180px] px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
+      <div className="relative z-10">
+        <ModeBanner />
+      </div>
+      {/* the horizon: a planet-edge of light rising behind the top of every page */}
+      <div className="pointer-events-none absolute inset-x-0 top-14 z-0 h-[680px] overflow-hidden lg:left-[264px] [mask-image:linear-gradient(180deg,#000_420px,transparent_520px)] md:[mask-image:linear-gradient(180deg,#000_330px,transparent_420px)]" aria-hidden>
+        <div
+          className="horizon w-[max(150%,1100px)] transition-[top,opacity] duration-[1600ms] ease-out-expo"
+          style={{ top: `${(mobileTop ? 430 : 340) - lit * 0.25}px`, opacity: 0.45 + (lit / 100) * 0.55 }}
+        />
+      </div>
+      <main className="relative z-10 mx-auto max-w-[1180px] px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
         {ws.status === "loading" || ws.status === "needs_auth" ? (
           <PageLoader label={ws.status === "needs_auth" ? "Redirecting to sign in…" : "Loading your workspace…"} />
         ) : ws.status === "error" ? (

@@ -2,9 +2,9 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Bot, Flag, Send, Target } from "lucide-react";
+import { Bot, Flag, MessagesSquare, Send, Target } from "lucide-react";
 import { RequireProfile } from "@/components/require-profile";
-import { Badge, Button, Card, CardTitle, EmptyState, ErrorState, LinkButton, Notice, Spinner, Textarea } from "@/components/ui";
+import { Badge, Button, Card, CardTitle, EmptyState, ErrorState, LinkButton, Notice, Progress, Spinner, Textarea } from "@/components/ui";
 import { useWorkspace } from "@/components/workspace";
 import { callAI, offlineAI, type ApiError } from "@/lib/client/ai";
 import { MAX_USER_TURNS } from "@/lib/config";
@@ -169,17 +169,16 @@ function Simulator() {
   }
 
   const lastIsUser = session?.messages[session.messages.length - 1]?.role === "user";
+  const initials = persona.name.split(" ").map((x) => x[0]).join("");
 
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-      <Card className="flex min-h-[70vh] flex-col p-0">
+      <Card className="flex min-h-[30rem] min-w-0 flex-col p-0 sm:p-0 lg:h-[calc(100dvh-10.5rem)] lg:min-h-[560px]">
         <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3">
           <div className="flex items-center gap-3">
-            <span className="grid h-9 w-9 place-items-center rounded-full bg-violet-tint text-sm font-semibold text-violet-soft">
-              {persona.name.split(" ").map((x) => x[0]).join("")}
-            </span>
+            <span className="grid h-9 w-9 place-items-center rounded-full bg-surface-3 text-sm font-semibold text-ink">{initials}</span>
             <div>
-              <p className="text-sm font-semibold">{persona.name}</p>
+              <p className="text-sm font-semibold text-ink">{persona.name}</p>
               <p className="flex items-center gap-1 text-xs text-muted">
                 <Bot className="h-3 w-3" aria-hidden /> AI-simulated client{session?.scripted ? " · scripted replies (offline, not AI)" : ""}
               </p>
@@ -194,7 +193,10 @@ function Simulator() {
 
         <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4" aria-live="polite">
           {!session ? (
-            <div className="mx-auto max-w-md py-10 text-center">
+            <div className="mx-auto flex h-full max-w-md flex-col items-center justify-center py-10 text-center">
+              <span className="mb-4 grid h-12 w-12 place-items-center rounded-full bg-surface-3 text-base font-semibold text-ink" aria-hidden>
+                {initials}
+              </span>
               <p className="text-sm text-ink-2">
                 You are selling <strong className="text-ink">{offer.title}</strong> for{" "}
                 <strong className="text-ink">
@@ -202,25 +204,44 @@ function Simulator() {
                 </strong>
                 . {persona.name} will open the conversation.
               </p>
-              <Button className="mt-5" onClick={start} loading={starting}>
-                Start conversation
+              <Button className="mt-5" size="lg" onClick={start} loading={starting}>
+                <MessagesSquare className="h-4 w-4" aria-hidden /> Start conversation
               </Button>
+              <p className="mt-3 text-xs text-muted">The client stays in character. Feedback comes after you end the session.</p>
             </div>
           ) : (
             session.messages.map((m) => (
-              <div key={m.id} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
+              <div key={m.id} className={cn("flex animate-fade-in items-end gap-2", m.role === "user" ? "justify-end" : "justify-start")}>
+                {m.role !== "user" && (
+                  <span className="mb-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-surface-3 text-xs font-semibold text-ink-2" aria-hidden>
+                    {initials}
+                  </span>
+                )}
                 <div
                   className={cn(
-                    "max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm",
-                    m.role === "user" ? "rounded-tr-sm bg-violet text-white" : "rounded-tl-sm bg-surface-3 text-ink",
+                    "max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
+                    m.role === "user" ? "rounded-br-md bg-[linear-gradient(135deg,#8a3dff,#5a1fd0)] text-white shadow-[0_10px_28px_-12px_rgb(150_63_255/0.9)]" : "rounded-bl-md border border-line bg-surface-2 text-ink backdrop-blur-md",
                   )}
                 >
+                  <span className="sr-only">{m.role === "user" ? "You: " : `${persona.name}: `}</span>
                   {m.content}
                 </div>
               </div>
             ))
           )}
-          {phase === "client" && <Spinner label={`${persona.name.split(" ")[0]} is typing…`} />}
+          {phase === "client" && (
+            <div className="flex items-end gap-2" role="status">
+              <span className="mb-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-surface-3 text-xs font-semibold text-ink-2" aria-hidden>
+                {initials}
+              </span>
+              <span className="flex items-center gap-1 rounded-2xl rounded-bl-md border border-line bg-surface-2 px-4 py-3.5">
+                <span className="sr-only">{persona.name.split(" ")[0]} is typing…</span>
+                {[0, 150, 300].map((d) => (
+                  <span key={d} className="h-1.5 w-1.5 animate-pulse rounded-full bg-muted" style={{ animationDelay: `${d}ms` }} aria-hidden />
+                ))}
+              </span>
+            </div>
+          )}
           {phase === "evaluating" && <Spinner label="Evaluating your conversation against the rubric…" />}
           <div ref={endRef} />
         </div>
@@ -273,17 +294,20 @@ function Simulator() {
                 </Button>
               </form>
             )}
-            <p className="mt-2 text-xs text-muted">
-              {userTurns}/{MAX_USER_TURNS} messages · at least 3 recommended for a confident evaluation · saved automatically
-            </p>
+            <div className="mt-3 flex items-center gap-3">
+              <Progress value={(userTurns / MAX_USER_TURNS) * 100} tone={userTurns >= 3 ? "violet" : "muted"} className="h-1 w-24 shrink-0" label="Messages used" />
+              <p className="text-xs text-muted">
+                {userTurns} of {MAX_USER_TURNS} messages · 3+ recommended for a confident evaluation · saved automatically
+              </p>
+            </div>
           </div>
         )}
       </Card>
 
-      <div className="space-y-4">
+      <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
         <Card>
           <CardTitle right={<Badge tone="violet">{scenario.difficulty}</Badge>}>Scenario briefing</CardTitle>
-          <p className="font-medium">{scenario.title}</p>
+          <p className="font-medium text-ink">{scenario.title}</p>
           <p className="mt-2 flex gap-2 text-sm text-ink-2">
             <Target className="mt-0.5 h-4 w-4 shrink-0 text-violet-soft" aria-hidden /> {scenario.goal}
           </p>

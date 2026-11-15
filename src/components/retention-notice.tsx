@@ -11,7 +11,8 @@ export function RetentionStorageNotice() {
     <p className="mb-4 flex items-start gap-2 rounded-xl border border-warn/25 bg-warn/[0.07] px-4 py-3 text-xs text-ink-2">
       <HardDrive className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warn" aria-hidden />
       Weekly missions and XP are being saved in this browser only, because the database tables for them are not available yet. Apply the
-      migration supabase/migrations/20261115000000_retention.sql to sync them with your account.
+      migrations supabase/migrations/20261115000000_retention.sql and 20261115000100_retention_integrity.sql to sync them with your
+      account. Progress saved here moves to your account automatically once they are applied.
     </p>
   );
 }

@@ -2,56 +2,70 @@
 name: Skills2Cash
 description: Turn what you know into what you can confidently offer and sell.
 colors:
-  workshop-black: "#07070b"
-  bench-surface: "#0e0e15"
-  raised-surface: "#14141d"
-  inset-surface: "#1b1b26"
-  hairline: "#262633"
-  hairline-strong: "#34344a"
-  ink: "#f4f4f8"
-  ink-secondary: "#c9c9d6"
-  ink-muted: "#9a9ab0"
-  workshop-violet: "#8b5cf6"
-  workshop-violet-deep: "#7c3aed"
-  violet-glow: "#c4b5fd"
-  violet-tint: "#1e1730"
-  signal-good: "#34d399"
-  signal-warn: "#fbbf24"
-  signal-bad: "#f87171"
+  bg: "#08060d"
+  rail: "#100a1c"
+  surface: "rgb(24 15 44 / 0.58)"
+  surface-2: "rgb(38 24 68 / 0.55)"
+  surface-3: "rgb(58 38 102 / 0.5)"
+  line: "rgb(197 167 255 / 0.11)"
+  line-strong: "rgb(197 167 255 / 0.2)"
+  ink: "#f8f6ff"
+  ink-2: "#d5cde6"
+  muted: "#a69bb8"
+  ink-2-lit: "#ebe4fb"
+  muted-lit: "#cdbfee"
+  violet: "#963fff"
+  violet-strong: "#782bff"
+  violet-deep: "#321078"
+  violet-soft: "#c5a7ff"
+  violet-tint: "rgb(120 43 255 / 0.16)"
+  spark: "#f2be6a"
+  good: "#3fcf8e"
+  warn: "#fb923c"
+  bad: "#f87171"
 typography:
   display:
-    fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
-    fontSize: "3.75rem"
-    fontWeight: 700
-    lineHeight: 1.08
-    letterSpacing: "-0.025em"
+    fontFamily: "Sora, Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "3.9rem"
+    fontWeight: 600
+    lineHeight: 1.06
+    letterSpacing: "-0.02em"
   headline:
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.875rem"
-    fontWeight: 700
-    lineHeight: 1.2
-    letterSpacing: "-0.025em"
+    fontFamily: "Sora, Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "2.125rem"
+    fontWeight: 600
+    lineHeight: 1.25
+    letterSpacing: "-0.02em"
   title:
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Sora, Geist, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1rem"
     fontWeight: 600
-    lineHeight: 1.5
+    lineHeight: 1.375
+    letterSpacing: "-0.025em"
+  figure:
+    fontFamily: "Geist, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
+    fontSize: "1.75rem"
+    fontWeight: 600
+    lineHeight: "2.25rem"
+    letterSpacing: "-0.025em"
+    fontFeature: "\"tnum\""
   body:
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Geist, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
     fontSize: "0.875rem"
     fontWeight: 400
-    lineHeight: 1.43
+    lineHeight: "1.25rem"
+    fontFeature: "\"tnum\""
   label:
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Geist, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
     fontSize: "0.75rem"
     fontWeight: 500
-    lineHeight: 1.33
-    letterSpacing: "0.05em"
+    lineHeight: "1rem"
+    fontFeature: "\"tnum\""
 rounded:
-  md: "6px"
   lg: "8px"
   xl: "12px"
   2xl: "16px"
+  3xl: "24px"
   full: "9999px"
 spacing:
   xs: "4px"
@@ -61,198 +75,270 @@ spacing:
   xl: "20px"
   2xl: "24px"
   3xl: "32px"
+  4xl: "48px"
 components:
   button-primary:
-    backgroundColor: "{colors.workshop-violet}"
+    backgroundColor: "{colors.violet-strong}"
+    textColor: "#ffffff"
+    rounded: "{rounded.xl}"
+    padding: "0 16px"
+    height: "40px"
+  button-primary-sm:
+    backgroundColor: "{colors.violet-strong}"
     textColor: "#ffffff"
     rounded: "{rounded.lg}"
-    padding: "0 16px"
-    height: "40px"
-  button-primary-hover:
-    backgroundColor: "{colors.workshop-violet-deep}"
+    padding: "0 14px"
+    height: "32px"
+  button-primary-lg:
+    backgroundColor: "{colors.violet-strong}"
+    textColor: "#ffffff"
+    rounded: "{rounded.xl}"
+    padding: "0 24px"
+    height: "48px"
   button-secondary:
-    backgroundColor: "{colors.inset-surface}"
+    backgroundColor: "{colors.surface-2}"
     textColor: "{colors.ink}"
-    rounded: "{rounded.lg}"
+    rounded: "{rounded.xl}"
     padding: "0 16px"
     height: "40px"
+  button-secondary-hover:
+    backgroundColor: "{colors.surface-3}"
   button-ghost:
-    textColor: "{colors.ink-secondary}"
-    rounded: "{rounded.lg}"
+    backgroundColor: "transparent"
+    textColor: "{colors.ink-2}"
+    rounded: "{rounded.xl}"
     padding: "0 16px"
     height: "40px"
-  card:
-    backgroundColor: "{colors.bench-surface}"
-    rounded: "{rounded.2xl}"
-    padding: "20px"
-  input:
-    backgroundColor: "{colors.raised-surface}"
+  button-ghost-hover:
+    backgroundColor: "{colors.surface-2}"
     textColor: "{colors.ink}"
-    rounded: "{rounded.lg}"
-    padding: "8px 12px"
+  card:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.2xl}"
+    padding: "24px"
+  card-lit:
+    backgroundColor: "{colors.violet-deep}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.2xl}"
+    padding: "28px"
+  input:
+    backgroundColor: "rgb(12 8 24 / 0.6)"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.xl}"
+    padding: "8px 14px"
     height: "40px"
-  badge:
-    backgroundColor: "{colors.inset-surface}"
-    textColor: "{colors.ink-secondary}"
+  badge-neutral:
+    backgroundColor: "{colors.surface-3}"
+    textColor: "{colors.ink-2}"
+    typography: "{typography.label}"
     rounded: "{rounded.full}"
     padding: "2px 8px"
   badge-violet:
     backgroundColor: "{colors.violet-tint}"
-    textColor: "{colors.violet-glow}"
+    textColor: "{colors.violet-soft}"
+    typography: "{typography.label}"
     rounded: "{rounded.full}"
     padding: "2px 8px"
-  nav-item-active:
+  badge-spark:
+    backgroundColor: "rgb(242 190 106 / 0.1)"
+    textColor: "{colors.spark}"
+    typography: "{typography.label}"
+    rounded: "{rounded.full}"
+    padding: "2px 8px"
+  journey-rail:
+    backgroundColor: "{colors.rail}"
+    width: "264px"
+  journey-step-current:
     backgroundColor: "{colors.violet-tint}"
-    textColor: "{colors.violet-glow}"
-    rounded: "{rounded.md}"
-    padding: "6px 8px"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.lg}"
+    padding: "8px 12px"
+  progress-track:
+    backgroundColor: "rgb(255 255 255 / 0.07)"
+    rounded: "{rounded.full}"
+    height: "6px"
 ---
 
 # Design System: Skills2Cash
 
 ## Overview
 
-**Creative North Star: "The Night Workshop"**
+**Creative North Star: "Rising Horizon"**
 
-A quiet, dark workshop where a skill is turned into a service. The room is near-black and calm so the work on the bench is what you see: an offer being drafted, a price being reasoned, a client conversation being rehearsed. Violet is the workshop's one lamp. It lights whatever matters right now — the next action, the current step, the thing just earned — and stays off everything else.
+Your skill is a light source. Every screen sits on a night sky with a violet planet-edge of light rising behind the top of the page, and the further the user moves along the journey the higher and brighter that horizon sits. Glass panels float over the sky with a lavender hairline and a soft top highlight, so the atmosphere reads through the work instead of being walled off behind grey boxes. On each application screen exactly one panel is lit: a deep-violet panel lit from its top-right corner that holds the next action.
 
-The interface is an instrument, not a showroom. Density is moderate: bordered cards on a dark ground, small text, tight labels, and a great many progress bars and status badges, because the product's job is to show honestly where the user stands. Depth comes from tonal layering of four near-black surfaces separated by hairline borders, not from shadows.
+Light is meaning. Violet light marks action, the current step and selection; the completed stretches of the journey rail glow violet; progress fills are violet-to-lavender bars with a soft halo. Gold light is a separate, rarer currency: it appears only on XP, levels and achievements, things the user has actually earned. Good, warn and bad are status colours and nothing else. Sora carries display and headings, Geist carries everything else, and every number is tabular.
 
-This document records the system as currently implemented in `src/app/globals.css` and `src/components/ui.tsx`. It is a description of what exists, not a redesign.
+The landing page (Persuade) carries the strongest atmosphere: a huge particle sphere rising from below the hero, gradient type on the headline accent, and a glass product preview emerging under the arc. The application (Operate) keeps the same world at lower volume: a fixed sky with slowly drifting light pools and a faint masked grid, the horizon arc fading out before mid-page content, glass cards and one lit panel.
 
 **Key Characteristics:**
-- Dark only. Near-black ground with a faint violet radial and grid on marketing and auth pages.
-- One accent hue (violet) plus three status colours (good, warn, bad).
-- Flat, bordered surfaces; shadows only for floating layers and violet glows on brand moments.
-- Compact type: 14px body, 12px labels, bold tight headlines.
-- Progress is everywhere and always computed from real activity.
+- Dark only, on a night-sky ground (#08060D) with a deeper violet-black rail.
+- Translucent glass surfaces over a living sky; the sky, horizon and grid are fixed atmosphere, never content.
+- One lit deep-violet panel per application screen, holding the next action.
+- Violet light for action, current step, selection and progress; gold light only for earned XP, levels and achievements; good, warn and bad for status only.
+- Sora display and headings, Geist text, tabular numerals, a 12px floor.
+- Exponential ease-out motion: one entrance rise, hover lift on glass, animated progress fills; everything static under reduced motion.
 
 ## Colors
 
-A near-black neutral ramp with a single violet accent and three functional status colours.
+A night sky lit from below by electric violet, with one warm gold reserved for reward.
 
 ### Primary
-- **Workshop Violet** (#8b5cf6): primary buttons, progress fills, completed step markers, active borders (usually at 30–60% opacity), focus rings.
-- **Workshop Violet Deep** (#7c3aed): primary button hover and the dark end of violet gradients on achievement and level tiles.
-- **Violet Glow** (#c4b5fd): accent text on dark — links, eyebrow labels, active navigation text, XP values, small icons.
-- **Violet Tint** (#1e1730): the lit surface. Background of active navigation items, violet badges, the "recommended next action" card and current-step tiles.
+- **Electric Violet** (violet-strong): the base of every primary button (a top-lit gradient from #9a4dff to this), the current journey marker, the start of progress fills and the coloured end of the horizon's outer glow.
+- **Horizon Violet** (violet): focus borders on fields, the next-step marker ring, chart series, and the mid-tone of the horizon and lit panels.
+- **Lavender Rim** (violet-soft): the focus outline, the caret, "Next step:" prefixes and card links, the top of progress fills and rail path, and the rim light of the horizon and sphere.
+- **Deep Night Violet** (violet-deep): the body of lit panels and the far side of orbs and stage markers.
+- **Violet Haze** (violet-tint): translucent fill for the current rail step, violet badges, icon wells and the guest banner.
+
+### Secondary
+- **Spark Gold** (spark): XP counts, level badges, level and XP progress fills (gradient from #d99a3c), achievement medallions with a gold glow, and the border of reward toasts. Never a button, link or decoration.
+
+### Tertiary
+- **Good** (good), **Warn** (warn), **Bad** (bad): status only. Good marks completion and current plan; warn marks what is unverified (demo mode, offline samples, price hypotheses); bad marks errors and invalid fields. Each is used as text on a 10% tint of itself with a 20% ring.
 
 ### Neutral
-- **Workshop Black** (#07070b): page background and theme colour.
-- **Bench Surface** (#0e0e15): cards and the main container surface.
-- **Raised Surface** (#14141d): inputs, list rows inside cards, menus, toasts.
-- **Inset Surface** (#1b1b26): progress tracks, neutral badges, secondary buttons, hover fills.
-- **Hairline** (#262633): default card and divider border.
-- **Hairline Strong** (#34344a): input borders, pills, secondary button borders.
-- **Ink** (#f4f4f8): headings and primary text.
-- **Ink Secondary** (#c9c9d6): body text inside cards.
-- **Ink Muted** (#9a9ab0): supporting text, captions, inactive navigation.
-
-### Status
-- **Signal Good** (#34d399): completed, passed, 80+ scores.
-- **Signal Warn** (#fbbf24): hypotheses, sub-60 scores, demo mode, offline samples.
-- **Signal Bad** (#f87171): errors and failed saves.
-
-Status colours are used as text and icon colour over a 5–10% tint of themselves with a 25–30% border, never as solid fills.
+- **Night Sky** (bg): the page ground behind the sky layer and the colour gradients fade into.
+- **Rail Night** (rail): the journey rail's base and the fill of un-started rail markers; the desktop rail itself is a translucent violet-to-night gradient over this.
+- **Glass** (surface), **Raised Glass** (surface-2), **Inset Glass** (surface-3): translucent violet-night layers. Surface is the card body; surface-2 is hover, secondary buttons and chat bubbles; surface-3 is the neutral badge and pressed hover.
+- **Lavender Hairline** (line) and **Strong Hairline** (line-strong): translucent lavender borders and dividers; strong for fields, secondary buttons and un-started markers.
+- **Starlight** (ink): primary text. **Mist** (ink-2): secondary text and body copy on the landing page. **Dusk** (muted): captions, hints, units and placeholder text.
+- **Lit Mist** (ink-2-lit) and **Lit Dusk** (muted-lit): the secondary text colours inside a lit panel, which re-tints ink-2 and muted to these so they keep contrast on violet.
 
 ### Named Rules
-**The One Lamp Rule.** Violet marks what matters now: the next action, the current step, the active item, something just earned. If everything on a screen is violet, nothing is.
+**The Translucent Surface Rule.** Surface, line and tint tokens are translucent so the sky reads through them. Never replace them with opaque hex; a surface that hides the atmosphere breaks the world.
 
-**The Honest Colour Rule.** Good, warn and bad mean status only. Warn in particular labels things that are unverified — price hypotheses, offline samples, provisional scores — and is not decoration.
+**The One Lit Panel Rule.** Each application screen has at most one lit deep-violet panel, and it holds the next action. Everything else is glass.
+
+**The Earned Gold Rule.** Gold appears only on things the user has earned or is earning: XP, levels, achievements, reward toasts. A greyed XP count turns gold when the mission is completed.
+
+**The Honest Status Rule.** Good, warn and bad describe state only. Warn labels what is unverified and is never used to draw the eye.
 
 ## Typography
 
-**Display Font:** Inter (with ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial)
-**Body Font:** the same stack
-**Label/Mono Font:** the default monospace stack, used only for small numeric scores
+**Display Font:** Sora (via `--font-sora`, falling back to Geist then system sans)
+**Body Font:** Geist (via `--font-geist`, falling back to system sans)
 
-**Character:** One sans family throughout, differentiated by weight and size. Bold, tightly tracked headlines over small, calm body text. Note: Inter is named in the stack but no webfont is loaded, so most visitors currently see their system UI font.
+**Character:** Sora's wide, geometric shapes give the headings a futuristic, luminous voice; Geist keeps the working interface compact and calm. Every `h1` and `h2` is set in Sora at -0.02em tracking with balanced wrapping; `h3` and below stay in Geist.
 
 ### Hierarchy
-- **Display** (700, 2.25rem → 3.75rem at `sm`, line-height 1.08, tracking-tight): landing hero only.
-- **Headline** (700, 1.5rem → 1.875rem at `sm`, tracking-tight): page titles (`PageHeader`).
-- **Title** (600, 1rem): card titles (`CardTitle`); 1.125–1.25rem for featured card headings.
-- **Body** (400, 0.875rem): nearly all interface text. Supporting copy is the same size in Ink Muted.
-- **Label** (500, 0.75rem): captions, badges, helper text. Section eyebrows are uppercase with 0.05em tracking. A few micro-labels drop to 10–11px.
-- **Numeric** (700, 1.875–3.75rem): readiness score, journey percentage, counts.
+- **Display** (Sora 600, 2.5rem on mobile rising to 3.9rem at xl, line-height 1.06): the landing headline only. Its second line is the gradient accent.
+- **Headline** (Sora 600, 1.75rem rising to 2.125rem, line-height 1.25): every application page title. The dashboard greeting runs larger (1.875rem to 2.5rem); landing section titles run 1.875rem to 2.6rem.
+- **Title** (Sora 600, 1rem, line-height 1.375): card titles. The lit panel's "Next step" title is 1.25rem to 1.5rem; empty-state titles are 1.125rem.
+- **Figure** (Geist 600, 1.75rem, line-height 2.25rem, tabular): the large numbers in the dashboard figures column, with the unit beside it in 14px Dusk.
+- **Body** (Geist 400, 14px, line-height 20px, tabular): nearly all interface text. Page subtitles are relaxed leading at 68ch; the lit panel's reason line is 60ch. Landing body runs 16px to 18px.
+- **Label** (Geist 500, 12px, line-height 16px, tabular, sentence case): badges, hints, XP counts, rail details and chart ticks.
+
+### Named Rules
+**The 12px Floor Rule.** Nothing in the interface is set below 12px, chart ticks and tooltips included.
+
+**The Tabular Figures Rule.** Numerals are tabular everywhere (set on `body`). A number sits as plain text with its unit in muted 14px beside it.
+
+**The Earned Gradient Type Rule.** Gradient type (pale lavender through #C5A7FF to #963FFF) is reserved for the landing headline accent and a few key words: one or two words in a landing section title, the demo persona's name, and the user's first name in the dashboard greeting. Never a whole heading, never body text, never a button label.
+
+**The Title First Rule.** Nothing sits above a page title to announce it. Page meta (week, disclaimers, source badges) follows the title.
 
 ## Layout
 
-A centred container (`max-w-7xl`, 1280px) with 16px side padding on mobile and 24px from `sm`. A sticky 56px header with a blurred near-black background sits above optional mode banners (demo, guest, local).
+The application is a fixed left rail (264px) and a main column capped at 1180px, with 16px side padding on mobile, 24px from sm and 40px from lg, and 32px to 40px of top padding. A sticky 56px glass header holds breadcrumbs and the user menu. Below lg the rail becomes a drawer (min(288px, 86vw)) opened from the header.
 
-Pages are stacks of cards on a 16px gap, arranged in two- or three-column grids from `lg` (1024px) and a single column below. Common splits: 2/3 + 1/3, and a fixed 320–380px side column beside a fluid main column. Cards use 20px padding; page headers have 24px below them.
+Content sits in 16px-gap grids of cards. The dashboard opens with the lit next-action panel beside a 300px figures column, then a full-width journey card, then 2:1 and 1:1 card rows. Card padding is 20px on mobile and 24px from sm; the lit panel takes 20px to 28px. Every learning page ends with a "Next:" link 48px below the content, separated by a hairline.
 
-Each learning page opens with a slim context row (breadcrumbs on the left, "Step N of 6" and a six-segment progress strip on the right) and ends with a single "Next in your journey" link.
+The atmosphere is layered and fixed: the sky sits behind everything at z -1; the horizon sits under the header in a masked box so it fades out by about 420px below the header from md up (520px on mobile), and its sides never cross mid-page headings. The horizon rises 25px and brightens from 45% to full opacity as journey progress goes from 0 to 100.
 
-Breakpoints are Tailwind's defaults: `sm` 640px, `md` 768px, `lg` 1024px, `xl` 1280px. The desktop navigation appears at `lg`; below it a menu button opens a vertical, numbered journey list.
+The landing page uses a 1152px container (1280px for the hero text at xl), a floating glass nav inset 12px from the top, and generous 64px to 112px section padding.
+
+Breakpoints are Tailwind's defaults: sm 640px, md 768px, lg 1024px, xl 1280px.
 
 ## Elevation & Depth
 
-Flat by default. Depth is tonal: Workshop Black → Bench Surface → Raised Surface → Inset Surface, each step separated by a 1px hairline. Cards carry no shadow.
+Depth is light, not grey. The world has three planes: the sky (fixed, drifting light pools, a faint 56px grid masked to fade with depth), glass (translucent panels blurred 18px over the sky), and float (denser glass at 92% to 94% opacity, blurred 22px, for menus, the mobile drawer and toasts). Glass carries a lavender hairline, an inner 1px white highlight at the top and a soft dark drop. Lit and interactive elements cast violet light: primary buttons and the lit panel throw a violet glow below themselves, progress fills and completed rail segments carry a soft halo, and earned gold elements carry a gold glow.
 
 ### Shadow Vocabulary
-- **Floating layer** (`shadow-2xl`): user menu and toasts only.
-- **Primary button edge** (`box-shadow: 0 0 0 1px #a78bfa33 inset`): a faint inner ring on violet buttons.
-- **Violet glow** (`0 0 10–18px rgba(139,92,246,0.35–0.45)`): the logo, level tile, unlocked achievement tiles and achievement toasts.
+- **Float** (`0 18px 40px -12px rgb(0 0 0 / 0.7), 0 2px 8px -2px rgb(0 0 0 / 0.5)`): floating layers and chart tooltips.
+- **Glow** (`0 10px 30px -8px rgb(120 43 255 / 0.55), 0 2px 6px -2px rgb(20 6 50 / 0.6)`): primary buttons and lit icon wells.
+- **Glow Large** (`0 30px 70px -24px rgb(120 43 255 / 0.6), 0 8px 24px -12px rgb(10 4 30 / 0.8)`): the lit panel and the landing product preview.
+- **Gold** (`0 8px 24px -8px rgb(242 190 106 / 0.45)`): earned achievement medallions and the level badge.
+- **Glass rest** (`inset 0 1px 0 rgb(255 255 255 / 0.06), 0 20px 40px -24px rgb(0 0 0 / 0.8)`): every glass panel.
+- **Glass hover** (`inset 0 1px 0 rgb(255 255 255 / 0.08), 0 24px 48px -24px rgb(120 43 255 / 0.45)`): interactive glass cards, with a 2px lift.
 
 ### Named Rules
-**The Earned Glow Rule.** Glow is reserved for the brand mark and for things the user has earned. Ordinary cards and buttons do not glow.
+**The Light Means Something Rule.** Violet glow marks action, the current step and progress; gold glow marks reward. Nothing glows for decoration alone outside the sky, the horizon and the landing hero.
+
+**The Unprefixed Blur Rule.** Hand-written glass materials declare `backdrop-filter` unprefixed only. The minifier dropped the unprefixed property when both forms were present.
+
+**The Lit Replaces Glass Rule.** A lit panel replaces the glass material rather than stacking on it, and re-tints secondary text inside itself.
 
 ## Shapes
 
-Rounded but not soft. Radius grows with the size of the container: 6px for navigation items, 8px for buttons, inputs and list rows, 12px for inner tiles and notices, 16px for cards, and full pills for badges, chips, progress bars and step markers. Every surface has a 1px border; there are no borderless floating cards. Step markers and avatars are circles; icon tiles are 12px-radius squares.
+Soft, generous rounding, and circles for anything that marks a point on the path. Cards, lit panels, menus and toasts use 16px corners; large landing panels and the product preview use 24px. Buttons and fields use 12px (small buttons 8px); rail items and list rows use 8px. Badges, progress tracks, journey markers, avatars and orbs are fully round. Chat bubbles are 16px with the speaker's bottom corner cut to 6px. Borders are 1px translucent lavender hairlines; there are no heavy strokes and no offset shadows.
+
+The horizon is a single shape: a huge circle (150% of the viewport, at least 1100px) whose top edge is a lavender rim with stacked violet glows, seen only as an arc.
 
 ## Components
 
 ### Buttons
-- **Shape:** 8px radius; heights 32 / 40 / 48px (`sm` / `md` / `lg`); medium weight, 14px text.
-- **Primary:** Workshop Violet with white text and the inset edge ring; hover shifts to Workshop Violet Deep.
-- **Secondary:** Inset Surface with a Hairline Strong border; hover border turns violet at 60%.
-- **Ghost:** text only in Ink Secondary; hover adds an Inset Surface fill.
-- **Danger:** Signal Bad text on a 10% tint with a 30% border.
-- **States:** disabled at 50% opacity; loading shows a spinning icon before the label. Focus is a 2px Violet Glow outline with 2px offset, global to all focusable elements.
+Lit, rounded and slightly lifting.
+- **Shape:** gently rounded (12px; 8px for the small size). Sizes are 32px, 40px and 48px tall.
+- **Primary:** a top-lit violet gradient (#9a4dff to Electric Violet) with white 14px medium text, an inner white highlight and the Glow shadow. Hover brightens 10% and lifts 1px; active settles back and dims. One per panel.
+- **Secondary:** Raised Glass with a Strong Hairline, a 12px backdrop blur and an inner highlight; hover moves to Inset Glass with a lavender border.
+- **Ghost:** transparent, Mist text; hover takes Raised Glass and Starlight.
+- **Danger:** bad text on a 10% bad tint with a 20% bad border.
+- **All:** 200ms exponential ease-out on transform, filter, colour and shadow; disabled at 45% opacity; the global 2px Lavender Rim focus outline at 2px offset.
 
-### Badges and chips
-- **Style:** full-pill, 12px medium text, 1px border; tones neutral, violet, good, warn, bad.
-- **Use:** status ("Current plan", "You are here"), difficulty, score pills, source labels ("Demonstrated", "Self-reported", "AI-generated", "Offline sample — not AI").
+### Badges
+- **Style:** fully round pills, 12px medium label text, a tinted fill with a matching inset ring. Neutral (Inset Glass, Mist), violet (Violet Haze, Lavender Rim), good, warn, bad and spark (10% tint of the hue, 20% to 25% ring).
+- **Use:** source (Demonstrated, Self-reported, AI-generated, Offline sample), score, plan and page meta. Spark only for earned values.
 
 ### Cards / Containers
 - **Corner Style:** 16px.
-- **Background:** Bench Surface; featured cards use a violet-tint gradient with a violet border at 30–50%.
-- **Shadow Strategy:** none (see Elevation).
-- **Border:** 1px Hairline.
-- **Internal Padding:** 20px. Rows inside cards are Raised Surface tiles with 12px radius and 10–12px padding.
+- **Background:** the glass material by default; a card given the lit material drops the glass material entirely.
+- **Shadow Strategy:** Glass rest; interactive cards take Glass hover with a 2px lift. See Elevation & Depth.
+- **Border:** 1px translucent lavender (13% on glass, 32% on lit).
+- **Internal Padding:** 20px, 24px from sm. Card titles are Sora 16px with an optional 14px Dusk subtitle and a right-aligned Lavender Rim link.
+
+### Lit Panel (signature)
+The one next action on a screen. A deep-violet field lit by a radial of Horizon Violet from its top-right corner and a pool of Deep Night Violet at bottom-left, over a 140-degree gradient (#3a148c to #160a36), with a 32% lavender border, a bright inner highlight and Glow Large. A glass orb sits half-cropped in a corner. Inside it, muted and secondary text re-tint to Lit Dusk and Lit Mist. Holds a "Next step:" title (prefix in Lavender Rim), one reason line and one large primary button.
 
 ### Inputs / Fields
-- **Style:** Raised Surface, 1px Hairline Strong border, 8px radius, 40px height, 14px text; label above in 14px medium Ink Secondary; hint below in 12px muted.
-- **Focus:** border turns violet with a 2px violet ring at 30%.
-- **Error / Disabled:** error text in Signal Bad below the field; disabled at 60% opacity.
+- **Style:** a dark translucent well (rgb 12 8 24 at 60%) with a Strong Hairline, 12px corners, 14px text, a 12px backdrop blur. Label above in 14px medium Starlight; hint below in 12px Dusk.
+- **Focus:** border turns Horizon Violet, the well deepens, and a 4px violet ring at 20% appears.
+- **Error / Disabled:** border at 70% bad with the message in 12px bad text; disabled at 60% opacity.
 
 ### Navigation
-- **Desktop:** Home, a divider, then the six journey steps joined by small chevrons. Inactive items are Ink Muted, completed steps Ink Secondary, the active step sits on Violet Tint in Violet Glow. The readiness score rides on the Readiness item; level and XP sit in a pill on the right, next to the avatar menu.
-- **Mobile:** a numbered vertical list with check marks for completed steps, then a separate Account group.
-- **Sub-navigation:** two-tab rows inside Service Builder (Offer / Pricing Builder) and Missions (Weekly / Skill).
+- **Journey rail:** 264px, a translucent violet-to-night gradient with an extra-large backdrop blur and a hairline right edge. Home and Dashboard links, then "Your journey": six steps joined by a 1px path. A completed step's segment becomes a lavender-to-violet gradient with a violet halo; its marker is a violet gradient disc with a check. The current step is a violet-haze row with an inset violet ring and an Electric Violet marker with a 4px ring and glow. The next step's marker is outlined in Horizon Violet with a "Next" label. Step details sit below in 12px Dusk.
+- **Level card:** the rail ends in a glass card with level, a gold XP count and a gold progress bar.
+- **Header:** sticky, 56px, night at 55% with a heavy blur, breadcrumbs in 14px Dusk with the current page in Starlight, and "Step n of 6" at md and up.
+- **Mobile:** the rail opens as a float-glass drawer over a blurred 60% black scrim.
 
 ### Progress
-The signature component. A 8px pill track in Inset Surface with a violet gradient fill (Workshop Violet → Violet Glow); green when complete, muted grey for self-reported values. It appears on nearly every screen, always paired with the real figure it represents.
+A 6px fully round track of white at 7%. The fill is a violet-to-lavender gradient with a violet halo (journey, demonstrated skills), a gold gradient with a gold halo (level and XP), solid good (completed weeks), or Mist at 40% (self-reported skills). Width animates over 700ms with exponential ease-out.
 
-### Journey steppers
-Numbered circles joined by a 1px line. Completed steps are solid violet with a check, the current step is outlined violet on Violet Tint, upcoming steps are Inset Surface with muted numerals.
+### Toasts
+Float-glass cards, 16px corners, bottom-right at 360px wide (full width on mobile). Reward toasts carry a spark border and a gold icon tile that plays the unlock animation; warn toasts carry a warn border and stay 10 seconds instead of 6.5.
+
+### Orb and Particle Sphere
+The orb is a decorative glass sphere lit from the upper left with a lavender core, a deep violet body and a violet drop glow, half-cropped inside lit panels. The particle sphere is the landing centrepiece: about 3,600 points on a canvas, brightest at the rim, turning slowly and leaning toward the pointer, paused off-screen and drawn as one still frame under reduced motion.
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** keep the interface dark, on the Workshop Black ground, with violet as the only accent hue.
-- **Do** use the official logo from `public/brand/skills2cash-logo.png` exactly as supplied.
-- **Do** separate surfaces with 1px hairlines and tonal steps rather than shadows.
-- **Do** pair every progress bar, score and percentage with the real number it comes from.
-- **Do** give the next recommended action the most visual weight on a page.
-- **Do** keep the 2px Violet Glow focus outline on every interactive element.
+- **Do** keep every surface, line and tint translucent so the sky reads through.
+- **Do** give each application screen at most one lit panel, and put the next action in it.
+- **Do** use violet light for action, current step, selection and progress, and gold only for XP, levels and achievements.
+- **Do** set h1 and h2 in Sora and everything else in Geist, with tabular numerals and nothing below 12px.
+- **Do** keep the horizon behind the top of the page, masked out by about 420px below the header, and let it follow journey progress.
+- **Do** use exponential ease-out (cubic-bezier(0.16, 1, 0.3, 1)) for entrances, lifts and progress fills, and keep everything static under reduced motion.
+- **Do** declare `backdrop-filter` unprefixed only in hand-written glass materials.
+- **Do** keep the 2px Lavender Rim focus outline on every interactive element.
+- **Do** label sample and demo content as sample wherever it appears.
 
 ### Don't:
-- **Don't** recolour, distort, crop or replace the logo.
-- **Don't** introduce a light theme or a second accent hue.
-- **Don't** use good, warn or bad colours for decoration.
-- **Don't** add glow to ordinary cards or buttons; it is reserved for the logo and earned moments.
+- **Don't** replace translucent surface tokens with opaque grey boxes.
+- **Don't** stack the glass material under a lit panel; the lit panel replaces it.
+- **Don't** use gradient type on whole headings, body text or buttons; it belongs to the landing headline accent and a few key words.
+- **Don't** use spark gold for actions, links or decoration, or good, warn and bad for anything but status.
+- **Don't** let the horizon or sky glows cross mid-page headings or sit behind dense content.
+- **Don't** put kickers or eyebrow labels above titles.
+- **Don't** set any text below 12px.
 - **Don't** show placeholder or invented progress, scores, testimonials or customer logos.
-- **Don't** mix the Pricing Builder (the user's service prices) with Subscription (platform billing) in one view.

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useWorkspace } from "./workspace";
-import { Card, CardTitle } from "./ui";
+import { Card, CardTitle, Progress } from "./ui";
 import { getSupabase } from "@/lib/client/supabase";
 import { completedSessions } from "@/lib/progress";
 
@@ -44,9 +44,22 @@ export function PlanUsage({ showPlansLink = true, className = "mt-4" }: { showPl
         Current plan: {actualPlan === "pro" ? "Pro" : "Free"}
       </CardTitle>
       {actualPlan === "pro" ? <p className="text-sm text-ink-2">Unlimited assessments, offers, scenarios and missions.</p> : (
-        <div className="grid gap-2 text-sm text-ink-2 sm:grid-cols-3">
-          <p>Assessments: {usage.assessments_used}/1</p><p>Offers: {usage.offers_created}/1</p><p>Simulations: {Math.min(usage.simulations_completed, 1)}/1</p>
-        </div>
+        <ul className="grid gap-5 sm:grid-cols-3">
+          {[
+            { label: "Skill assessments", used: usage.assessments_used },
+            { label: "Service offers", used: usage.offers_created },
+            { label: "AI simulations", used: Math.min(usage.simulations_completed, 1) },
+          ].map((u) => (
+            <li key={u.label}>
+              <div className="flex items-baseline justify-between gap-2 text-sm">
+                <span className="text-ink-2">{u.label}</span>
+                <span className={u.used >= 1 ? "font-medium text-warn" : "font-medium text-ink"}>{u.used} of 1</span>
+              </div>
+              <Progress value={Math.min(u.used, 1) * 100} tone={u.used >= 1 ? "muted" : "violet"} className="mt-2" label={`${u.label} used`} />
+              {u.used >= 1 && <p className="mt-1.5 text-xs text-muted">Free limit reached</p>}
+            </li>
+          ))}
+        </ul>
       )}
     </Card>
   );

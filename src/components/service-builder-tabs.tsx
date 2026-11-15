@@ -26,7 +26,7 @@ export function ServiceBuilderTabs() {
             aria-current={active ? "page" : undefined}
             className={cn(
               "flex items-center gap-2.5 rounded-xl border px-3 py-2 transition-colors sm:min-w-[210px]",
-              active ? "border-violet/60 bg-violet-tint/60" : "border-line bg-surface hover:border-line-strong",
+              active ? "border-violet/50 bg-[linear-gradient(135deg,rgb(120_43_255/0.32),rgb(50_16_120/0.3))] shadow-glow" : "border-line bg-surface backdrop-blur-md hover:border-line-strong",
             )}
           >
             <span

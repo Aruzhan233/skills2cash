@@ -29,14 +29,21 @@ export default function DemoPage() {
   }
 
   return (
-    <div className="bg-grid min-h-screen">
-      <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+    <div className="relative min-h-screen overflow-hidden">
+      <div className="sky" aria-hidden />
+      <div className="lamp pointer-events-none absolute inset-0" aria-hidden />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[760px] overflow-hidden [mask-image:linear-gradient(180deg,#000_55%,transparent)]" aria-hidden>
+        <div className="horizon top-[330px] w-[max(150%,1100px)]" />
+      </div>
+      <div className="relative mx-auto max-w-4xl px-4 py-10 sm:px-6">
         <Logo />
         <div className="mt-10">
-          <p className="inline-flex items-center gap-2 rounded-full border border-warn/30 bg-warn/10 px-3 py-1 text-xs font-semibold text-warn">
+          <h1 className="text-4xl font-semibold sm:text-5xl">
+            Meet <span className="text-gradient">Alex.</span>
+          </h1>
+          <p className="mt-4 inline-flex items-center gap-2 rounded-full border border-warn/30 bg-warn/10 px-3 py-1 text-xs font-semibold text-warn">
             <FlaskConical className="h-3.5 w-3.5" aria-hidden /> Demo — no sign-up required
           </p>
-          <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">Meet Alex.</h1>
           <p className="mt-3 max-w-2xl text-ink-2">
             Alex can edit short-form videos but has never sold this as a service. Alex&apos;s assessment, offer, three missions and one
             practice conversation are pre-written sample data so you can explore quickly. Everything you do next — new simulations, missions,
@@ -50,11 +57,17 @@ export default function DemoPage() {
             { key: "practice", icon: MessagesSquare, title: "Try the negotiation", text: "A client says another freelancer is cheaper.", href: "/practice/cheaper-freelancer" },
             { key: "result", icon: BarChart3, title: "See a scored result", text: "Rubric scores, quotes and the next exercise.", href: "/practice#history" },
           ].map((c) => (
-            <Card key={c.key} className="flex flex-col">
-              <c.icon className="h-6 w-6 text-violet-soft" aria-hidden />
-              <h2 className="mt-3 font-semibold">{c.title}</h2>
-              <p className="mt-1 flex-1 text-sm text-muted">{c.text}</p>
-              <Button className="mt-4" loading={busy === c.key} disabled={busy !== null} onClick={() => go(c.href, c.key)}>
+            <Card key={c.key} className={c.key === "practice" ? "glass-lit flex flex-col" : "glass-hover flex flex-col"}>
+              <c.icon className={c.key === "practice" ? "relative h-6 w-6 text-white" : "h-6 w-6 text-violet-soft"} aria-hidden />
+              <h2 className="relative mt-3 font-semibold">{c.title}</h2>
+              <p className="relative mt-1 flex-1 text-sm text-muted">{c.text}</p>
+              <Button
+                variant={c.key === "practice" ? "primary" : "secondary"}
+                className="relative mt-4"
+                loading={busy === c.key}
+                disabled={busy !== null}
+                onClick={() => go(c.href, c.key)}
+              >
                 Open
               </Button>
             </Card>

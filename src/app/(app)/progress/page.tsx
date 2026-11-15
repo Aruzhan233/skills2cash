@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Award, CalendarCheck, CheckCircle2, Circle, ClipboardList, Gauge, MessagesSquare, Sparkles } from "lucide-react";
+import { ArrowRight, Award, CalendarCheck, CheckCircle2, Circle, ClipboardList, Gauge, MessagesSquare, Sparkles } from "lucide-react";
 import { AchievementsList } from "@/components/achievements";
 import { LevelCard } from "@/components/level-card";
 import { RequireProfile } from "@/components/require-profile";
@@ -62,38 +62,40 @@ function Tracker() {
       <RetentionStorageNotice />
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="border-violet/30 bg-gradient-to-br from-violet-tint/70 to-surface lg:col-span-2">
-          <p className="text-xs font-medium uppercase tracking-wider text-violet-soft">Monetization journey</p>
-          <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
-            <p className="text-5xl font-bold">
+        <Card className="relative isolate min-w-0 overflow-hidden lg:col-span-2">
+          <span className="pointer-events-none absolute -right-24 -top-28 -z-10 h-72 w-72 rounded-full bg-violet/25 blur-3xl" aria-hidden />
+          <h2 className="text-base font-semibold text-ink">Monetization journey</h2>
+          <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
+            <p className="text-5xl font-semibold tracking-tight text-ink [text-shadow:0_4px_30px_rgb(150_63_255/0.55)]">
               {overall}
-              <span className="text-xl font-normal text-muted">% complete</span>
+              <span className="ml-1 text-lg font-normal text-muted">% complete</span>
             </p>
             <p className="text-sm text-ink-2">
               Now: <span className="font-medium text-ink">Phase {cur.number} — {cur.title}</span>
             </p>
           </div>
           <Progress value={overall} className="mt-3 h-2.5" label="Overall journey progress" />
-          <div className="mt-4 flex flex-col gap-3 border-t border-violet/20 pt-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <p className="text-xs text-muted">Recommended next action</p>
-              <p className="truncate font-medium">{rec.title}</p>
-            </div>
+          <div className="mt-5 flex flex-col gap-3 glass-lit rounded-xl p-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="min-w-0 truncate font-medium text-ink">
+              <span className="text-violet-soft">Next step: </span>
+              {rec.title}
+            </p>
             <LinkButton href={rec.href} size="sm">
               {rec.cta}
             </LinkButton>
           </div>
         </Card>
-        <LevelCard level={level} className="flex flex-col justify-center" />
+        <LevelCard level={level} className="flex min-w-0 flex-col justify-center" />
       </div>
 
-      <ul className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+      <ul className="mt-4 grid grid-cols-2 overflow-hidden rounded-2xl border border-line bg-line gap-px md:grid-cols-3 xl:grid-cols-6" aria-label="Milestones">
         {milestones.map((m) => (
-          <li key={m.label}>
-            <Link href={m.href} className="block h-full rounded-2xl border border-line bg-surface p-4 transition-colors hover:border-violet/40">
-              <m.icon className="h-4 w-4 text-violet-soft" aria-hidden />
-              <p className="mt-2 text-xl font-bold">{m.value}</p>
-              <p className="text-xs leading-tight text-muted">{m.label}</p>
+          <li key={m.label} className="bg-[rgb(14_9_28/0.86)] backdrop-blur-md">
+            <Link href={m.href} className="block h-full p-4 transition-colors duration-150 hover:bg-surface-2">
+              <p className="flex items-center gap-1.5 text-xs text-muted">
+                <m.icon className="h-3.5 w-3.5 shrink-0" aria-hidden /> {m.label}
+              </p>
+              <p className="mt-1.5 text-xl font-semibold text-ink">{m.value}</p>
             </Link>
           </li>
         ))}
@@ -108,11 +110,11 @@ function Tracker() {
               const isCur = p.key === cur.key;
               return (
                 <li key={p.key} id={`phase-${p.key}`} className="relative scroll-mt-24 pb-5 pl-10 last:pb-0">
-                  {i < phases.length - 1 && <span className={cn("absolute left-[13px] top-7 h-[calc(100%-1.75rem)] w-px", done ? "bg-violet/50" : "bg-line-strong")} aria-hidden />}
+                  {i < phases.length - 1 && <span className={cn("absolute left-[13px] top-7 h-[calc(100%-1.75rem)] w-px", done ? "bg-[linear-gradient(180deg,#c5a7ff,#782bff)] shadow-[0_0_8px_rgb(150_63_255/0.7)]" : "bg-line-strong")} aria-hidden />}
                   <span
                     className={cn(
                       "absolute left-0 top-0 grid h-7 w-7 place-items-center rounded-full text-xs font-semibold",
-                      done ? "bg-violet text-white" : isCur ? "border border-violet bg-violet-tint text-violet-soft" : "bg-surface-3 text-muted",
+                      done ? "bg-[linear-gradient(180deg,#a45cff,#782bff)] text-white shadow-[0_2px_10px_rgb(150_63_255/0.6)]" : isCur ? "border border-violet bg-violet-tint text-violet-soft" : "bg-surface-3 text-muted",
                     )}
                   >
                     {done ? <CheckCircle2 className="h-4 w-4" aria-hidden /> : p.number}
@@ -122,7 +124,7 @@ function Tracker() {
                       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
                         <span className="flex items-center gap-2">
                           <span className={cn("font-semibold", done || isCur ? "text-ink" : "text-ink-2")}>{p.title}</span>
-                          {isCur && <Badge tone="violet">You are here</Badge>}
+                          {isCur && <Badge tone="violet">Current phase</Badge>}
                         </span>
                         <span className="text-xs text-muted">
                           {p.done} of {p.total} · <span className={done ? "text-good" : "text-ink-2"}>{p.percent}%</span>
@@ -154,9 +156,9 @@ function Tracker() {
             <div className="flex h-32 items-end gap-2" role="img" aria-label={`Activities per week: ${activity.map((a) => `${a.label} ${a.total}`).join(", ")}`}>
               {activity.map((a) => (
                 <div key={a.weekStart} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
-                  <span className="text-[11px] text-ink-2">{a.total}</span>
+                  <span className="text-xs text-ink-2">{a.total}</span>
                   <div
-                    className={cn("w-full rounded-t-md", a.total ? "bg-gradient-to-t from-violet-strong to-violet" : "bg-surface-3")}
+                    className={cn("w-full rounded-t-md", a.total ? "bg-violet" : "bg-surface-3")}
                     style={{ height: `${a.total ? Math.max(8, (a.total / maxActivity) * 100) : 4}%` }}
                     title={`${a.missions} skill missions · ${a.simulations} simulations · ${a.weekly} weekly missions`}
                   />
@@ -165,7 +167,7 @@ function Tracker() {
             </div>
             <div className="mt-1.5 flex gap-2">
               {activity.map((a) => (
-                <span key={a.weekStart} className="flex-1 truncate text-center text-[10px] text-muted">
+                <span key={a.weekStart} className="flex-1 truncate text-center text-xs text-muted">
                   {a.label}
                 </span>
               ))}
@@ -183,7 +185,7 @@ function Tracker() {
                   <li key={s.key}>
                     <div className="flex items-center justify-between text-sm">
                       <span>{s.label}</span>
-                      <span className="font-mono text-xs text-ink-2">{s.demonstrated}</span>
+                      <span className="font-medium tabular-nums text-xs text-ink-2">{s.demonstrated}</span>
                     </div>
                     <Progress value={s.demonstrated} className="mt-1" tone="good" label={s.label} />
                   </li>
@@ -204,7 +206,7 @@ function Tracker() {
                       <span>{s.label}</span>
                       <span className="flex items-center gap-2">
                         <SourceBadge source={s.source} />
-                        <span className="font-mono text-xs text-ink-2">{s.display ?? "—"}</span>
+                        <span className="font-medium tabular-nums text-xs text-ink-2">{s.display ?? "—"}</span>
                       </span>
                     </div>
                     <Progress value={s.display} className="mt-1" tone={s.source === "demonstrated" ? "violet" : "muted"} label={s.label} />
@@ -215,7 +217,7 @@ function Tracker() {
               <p className="text-sm text-muted">Every competency is demonstrated at {PASS_SCORE}+.</p>
             )}
             <Link href="/profile/skills" className="mt-3 inline-block text-sm text-violet-soft hover:underline">
-              Open Skill Profile →
+              Open Skill Profile <ArrowRight className="inline h-3.5 w-3.5" aria-hidden />
             </Link>
           </Card>
         </div>
@@ -239,12 +241,12 @@ function Tracker() {
             {history.map((t) => (
               <li key={t.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
                 <span className="min-w-0">
-                  <span className="block truncate">{t.label}</span>
+                  <span className="block truncate text-ink">{t.label}</span>
                   <span className="text-xs text-muted">
                     {t.source === "achievement" ? "Achievement" : "Weekly mission"} · {formatDateTime(t.createdAt)}
                   </span>
                 </span>
-                <span className="shrink-0 font-semibold text-violet-soft">+{t.amount} XP</span>
+                <span className="shrink-0 font-semibold text-spark">+{t.amount} XP</span>
               </li>
             ))}
           </ul>

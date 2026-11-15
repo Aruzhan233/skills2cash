@@ -43,8 +43,8 @@ export default function SessionResultPage() {
         <div className="space-y-2">
           {s.messages.map((m) => (
             <div key={m.id} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
-              <div className={cn("max-w-[85%] rounded-2xl px-4 py-2 text-sm", m.role === "user" ? "bg-violet/90 text-white" : "bg-surface-3 text-ink")}>
-                <span className="mb-0.5 block text-[10px] uppercase tracking-wider opacity-70">{m.role === "user" ? "You" : "Client"}</span>
+              <div className={cn("max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm leading-relaxed", m.role === "user" ? "rounded-br-md bg-[linear-gradient(135deg,#8a3dff,#5a1fd0)] text-white shadow-[0_10px_28px_-12px_rgb(150_63_255/0.9)]" : "rounded-bl-md border border-line bg-surface-2 text-ink backdrop-blur-md")}>
+                <span className={cn("mb-1 block text-xs font-medium", "text-muted")}>{m.role === "user" ? "You" : "Client"}</span>
                 {m.content}
               </div>
             </div>

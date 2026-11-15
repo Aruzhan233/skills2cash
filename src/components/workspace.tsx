@@ -303,35 +303,48 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     [requireRepo],
   );
 
+  const completingMissions = useRef(new Set<string>());
+  const completeMission = async (id: string, note: string) => {
+    const r = requireRepo();
+    const mission = stateRef.current.weeklyMissions.find((m) => m.id === id);
+    if (!mission) throw new Error("This mission no longer exists. Reload the page.");
+    if (mission.status === "completed") throw new Error("This mission is already completed.");
+    if (new Date(mission.deadline).getTime() < Date.now()) throw new Error("This mission's deadline has passed. It may come back in a future week.");
+    const parsed = CompletionNoteSchema.safeParse(note);
+    if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Add a short note about what you did.");
+    // One step: the mission is completed and its XP recorded together (atomically in the database).
+    const result = await r.completeWeeklyMission(mission, parsed.data, new Date().toISOString());
+    const done: WeeklyMission = { ...mission, status: "completed", completionNote: parsed.data, completedAt: result.completedAt };
+    const tx: XpTransaction = { id: newId(), source: "weekly_mission", refKey: mission.id, amount: mission.xp, label: mission.title, createdAt: result.completedAt };
+    const before = levelFor(totalXp(stateRef.current.xp));
+    const isNew = result.awarded;
+    setState((cur) => ({
+      ...cur,
+      weeklyMissions: cur.weeklyMissions.map((m) => (m.id === id ? done : m)),
+      // Reflect the award locally even if it was already recorded (e.g. completed on another device); toast only when new.
+      xp: !cur.xp.some((x) => x.source === tx.source && x.refKey === tx.refKey) ? [...cur.xp, tx] : cur.xp,
+    }));
+    if (isNew) {
+      const after = levelFor(before.xp + tx.amount);
+      pushToasts([
+        { kind: "xp", title: "Mission completed", body: `${mission.title} · +${mission.xp} XP` },
+        ...(after.level > before.level ? [{ kind: "level" as const, title: `Level ${after.level} — ${after.title}`, body: `${after.toNext} XP to the next level` }] : []),
+      ]);
+    }
+  };
+
   const ctx: WorkspaceCtx = {
     toasts,
     dismissToast,
     retentionStorage: repo?.retentionStorage() ?? "browser",
     completeWeeklyMission: async (id, note) => {
-      const r = requireRepo();
-      const mission = stateRef.current.weeklyMissions.find((m) => m.id === id);
-      if (!mission) throw new Error("This mission no longer exists. Reload the page.");
-      if (mission.status === "completed") throw new Error("This mission is already completed.");
-      if (new Date(mission.deadline).getTime() < Date.now()) throw new Error("This mission's deadline has passed. It may come back in a future week.");
-      const parsed = CompletionNoteSchema.safeParse(note);
-      if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Add a short note about what you did.");
-      const now = new Date().toISOString();
-      const done: WeeklyMission = { ...mission, status: "completed", completionNote: parsed.data, completedAt: now };
-      await r.saveWeeklyMissions([done]);
-      const tx: XpTransaction = { id: newId(), source: "weekly_mission", refKey: mission.id, amount: mission.xp, label: mission.title, createdAt: now };
-      const before = levelFor(totalXp(stateRef.current.xp));
-      const isNew = await r.addXp(tx);
-      setState((cur) => ({
-        ...cur,
-        weeklyMissions: cur.weeklyMissions.map((m) => (m.id === id ? done : m)),
-        xp: isNew && !cur.xp.some((x) => x.source === tx.source && x.refKey === tx.refKey) ? [...cur.xp, tx] : cur.xp,
-      }));
-      if (isNew) {
-        const after = levelFor(before.xp + tx.amount);
-        pushToasts([
-          { kind: "xp", title: "Mission completed", body: `${mission.title} · +${mission.xp} XP` },
-          ...(after.level > before.level ? [{ kind: "level" as const, title: `Level ${after.level} — ${after.title}`, body: `${after.toNext} XP to the next level` }] : []),
-        ]);
+      // One request per mission at a time: rapid repeat clicks are ignored (the database pays once regardless).
+      if (completingMissions.current.has(id)) return;
+      completingMissions.current.add(id);
+      try {
+        await completeMission(id, note);
+      } finally {
+        completingMissions.current.delete(id);
       }
     },
     mode: mode ?? "live",
@@ -372,11 +385,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       // Weekly missions and XP: skip anything the account already has (same week + mission, or same award).
       const hasMission = (m: WeeklyMission) => targetState.weeklyMissions.some((t) => t.id === m.id || (t.weekStart === m.weekStart && t.templateKey === m.templateKey));
       const movedMissions = sourceState.weeklyMissions.filter((m) => !hasMission(m));
-      await target.saveWeeklyMissions(movedMissions);
-      for (const t of sourceState.xp) {
-        if (t.source === "weekly_mission" && !movedMissions.some((m) => m.id === t.refKey)) continue;
-        await target.addXp(t);
-      }
+      // Completed missions are re-completed in the account (keeping their time), which records their XP exactly once.
+      await target.importRetention(movedMissions, sourceState.xp);
       localStorage.removeItem(GUEST_MODE_KEY);
       localStorage.removeItem(GUEST_DATA_KEY);
       setGuest(false);

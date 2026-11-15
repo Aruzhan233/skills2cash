@@ -49,7 +49,7 @@ const ICONS: Record<string, LucideIcon> = {
 export function AchievementsList({ items, compact, grid }: { items: Achievement[]; compact?: boolean; grid?: boolean }) {
   const sorted = [...items].sort((a, b) => Number(b.earned) - Number(a.earned));
   return (
-    <ul className={cn(grid ? "grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3" : "space-y-2.5", compact && !grid && "space-y-2")}>
+    <ul className={cn(grid ? "grid gap-x-6 gap-y-1 sm:grid-cols-2 xl:grid-cols-3" : "divide-y divide-line", compact && !grid && "divide-y divide-line")}>
       {sorted.map((a) => {
         const Icon = ICONS[a.key] ?? Award;
         return (
@@ -57,18 +57,17 @@ export function AchievementsList({ items, compact, grid }: { items: Achievement[
             <Link
               href={a.href}
               className={cn(
-                "flex h-full items-center gap-3 rounded-xl border p-3 transition-colors",
-                a.earned ? "border-violet/30 bg-violet-tint/60 hover:border-violet/60" : "border-line bg-surface-2/50 hover:border-line-strong",
+                "-mx-2 flex h-full items-center gap-3 rounded-lg px-2 py-2.5 transition-colors duration-150 hover:bg-surface-2",
               )}
             >
               <span
                 className={cn(
                   "relative grid h-10 w-10 shrink-0 place-items-center rounded-xl",
-                  a.earned ? "bg-gradient-to-br from-violet to-violet-strong text-white shadow-[0_0_14px_rgba(139,92,246,0.35)]" : "bg-surface-3 text-muted",
+                  a.earned ? "bg-[radial-gradient(circle_at_35%_30%,rgb(242_190_106/0.35),rgb(242_190_106/0.08))] text-spark ring-1 ring-inset ring-spark/35 shadow-gold" : "bg-surface-3 text-muted ring-1 ring-inset ring-line",
                 )}
                 aria-hidden
               >
-                <Icon className={cn("h-5 w-5", !a.earned && "opacity-50")} />
+                <Icon className={cn("h-5 w-5", !a.earned && "opacity-60")} />
                 {!a.earned && (
                   <span className="absolute -bottom-1 -right-1 grid h-4 w-4 place-items-center rounded-full border border-line-strong bg-surface-2">
                     <Lock className="h-2.5 w-2.5" />
@@ -79,7 +78,7 @@ export function AchievementsList({ items, compact, grid }: { items: Achievement[
                 <span className={cn("block text-sm font-medium", a.earned ? "text-ink" : "text-ink-2")}>{a.title}</span>
                 <span className="block text-xs text-muted">{a.earned ? `Earned ${formatDate(a.earnedAt)}` : a.description}</span>
               </span>
-              <span className={cn("shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-medium", a.earned ? "border-violet/30 text-violet-soft" : "border-line-strong text-muted")}>
+              <span className={cn("shrink-0 text-xs font-medium tabular-nums", a.earned ? "text-spark" : "text-muted")}>
                 {a.earned ? "+" : ""}
                 {a.xp} XP
               </span>

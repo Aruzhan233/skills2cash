@@ -231,7 +231,7 @@ export default function OnboardingPage() {
           <Card className="md:col-span-2">
             <CardTitle>Summary</CardTitle>
             <p className="text-sm text-ink-2">{result.summary}</p>
-            <p className="mt-4 text-xs font-medium uppercase tracking-wider text-muted">Facts you told us</p>
+            <h3 className="mt-5 text-sm font-medium text-ink">Facts you told us</h3>
             <ul className="mt-2 grid gap-1 text-sm text-ink-2 sm:grid-cols-2">
               {result.facts_from_user.map((f) => (
                 <li key={f} className="flex gap-2">
@@ -275,7 +275,7 @@ export default function OnboardingPage() {
                 );
               })}
             </ul>
-            <p className="mt-4 text-xs font-medium uppercase tracking-wider text-muted">Gaps to work on</p>
+            <h3 className="mt-5 text-sm font-medium text-ink">Gaps to work on</h3>
             <ul className="mt-2 space-y-1.5 text-sm text-ink-2">
               {result.gaps.map((g) => (
                 <li key={g.competency + g.note}>
@@ -451,13 +451,21 @@ export default function OnboardingPage() {
           You are in demo mode. Saving this assessment will replace Alex&apos;s demo profile in your demo workspace (only in this browser).
         </Notice>
       )}
-      <ol className="mb-6 grid grid-cols-4 gap-2" aria-label="Progress">
-        {STEPS.map((st, i) => (
-          <li key={st.title}>
-            <div className={cn("h-1.5 rounded-full", i <= step ? "bg-violet" : "bg-surface-3")} />
-            <p className={cn("mt-1.5 hidden text-xs sm:block", i === step ? "text-ink" : "text-muted")}>{st.title}</p>
-          </li>
-        ))}
+      <ol className="mb-6 grid grid-cols-4 gap-2" aria-label="Assessment progress">
+        {STEPS.map((st, i) => {
+          const done = i < step;
+          const cur = i === step;
+          return (
+            <li key={st.title} aria-current={cur ? "step" : undefined}>
+              <div className={cn("h-1 rounded-full transition-colors duration-300", done ? "bg-violet" : cur ? "bg-violet-soft" : "bg-surface-3")} />
+              <p className={cn("mt-2 flex items-center gap-1.5 text-xs", cur ? "font-medium text-ink" : done ? "text-ink-2" : "text-muted")}>
+                {done ? <Check className="h-3 w-3 shrink-0 text-violet-soft" aria-hidden /> : <span className="tabular-nums">{i + 1}</span>}
+                <span className="hidden sm:inline">{st.title}</span>
+                <span className="sr-only">{done ? " (done)" : cur ? " (current)" : ""}</span>
+              </p>
+            </li>
+          );
+        })}
       </ol>
       <Card className="p-6">
         <h2 className="mb-5 text-lg font-semibold">

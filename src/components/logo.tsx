@@ -11,7 +11,11 @@ export function LogoMark({ size = 30, className, priority }: { size?: number; cl
 
 export function Logo({ href = "/", size = 30 }: { href?: string; size?: number }) {
   return (
-    <Link href={href} className="flex items-center gap-2 font-semibold tracking-tight text-ink" aria-label="Skills2Cash home">
+    <Link
+      href={href}
+      className="-mx-1.5 flex cursor-pointer items-center gap-2 rounded-lg px-1.5 py-1 font-semibold tracking-tight text-ink transition-opacity duration-150 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet"
+      aria-label="Skills2Cash home"
+    >
       <LogoMark size={size} priority />
       <span className="text-[15px]">
         Skills<span className="text-violet-soft">2</span>Cash

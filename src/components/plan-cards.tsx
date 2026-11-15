@@ -53,22 +53,22 @@ export function PlanCards() {
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="flex flex-col">
           <div className="flex items-center justify-between gap-2">
-            <Badge>FREE</Badge>
+            <h3 className="text-base font-semibold text-ink">Free</h3>
             {!pro && <Badge tone="good">Current plan</Badge>}
           </div>
-          <p className="mt-3 text-3xl font-bold">$0<span className="text-sm font-normal text-muted"> / month</span></p>
+          <p className="mt-3 text-4xl font-semibold tracking-tight text-ink">$0<span className="text-sm font-normal text-muted"> / month</span></p>
           <ul className="my-5 space-y-2 text-sm text-ink-2">{FREE_FEATURES.map((x) => <li key={x} className="flex gap-2"><Check className="h-4 w-4 shrink-0 text-good" aria-hidden />{x}</li>)}</ul>
-          <Button variant="secondary" disabled className="mt-auto w-full">{pro ? "Included in Pro" : "Current Free Plan"}</Button>
+          <Button variant="secondary" disabled className="mt-auto w-full">{pro ? "Included in Pro" : "Your current plan"}</Button>
         </Card>
-        <Card className="flex flex-col border-violet/50 bg-violet-tint/20">
+        <Card className="glass-lit flex flex-col">
           <div className="flex items-center justify-between gap-2">
-            <Badge tone="violet">PRO</Badge>
+            <h3 className="relative text-base font-semibold text-ink">Pro</h3>
             {pro && <Badge tone="good">Current plan</Badge>}
           </div>
-          <p className="mt-3 text-3xl font-bold">$19<span className="text-sm font-normal text-muted"> / month</span></p>
-          <ul className="my-5 space-y-2 text-sm text-ink-2">{PRO_FEATURES.map((x) => <li key={x} className="flex gap-2"><Check className="h-4 w-4 shrink-0 text-violet-soft" aria-hidden />{x}</li>)}</ul>
+          <p className="mt-3 text-4xl font-semibold tracking-tight text-ink"><span className="relative">$19</span><span className="text-sm font-normal text-muted"> / month</span></p>
+          <ul className="my-5 space-y-2 text-sm text-ink-2">{PRO_FEATURES.map((x) => <li key={x} className="flex gap-2"><Check className="h-4 w-4 shrink-0 text-white" aria-hidden />{x}</li>)}</ul>
           {pro ? (
-            <Button variant="secondary" disabled className="mt-auto w-full">Current Pro Plan</Button>
+            <Button variant="secondary" disabled className="mt-auto w-full">Your current plan</Button>
           ) : (
             <Button className="mt-auto w-full" onClick={upgrade} loading={busy}>{busy ? "Opening checkout…" : "Upgrade to Pro"}</Button>
           )}
@@ -82,10 +82,10 @@ export function PlanCards() {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[420px] text-left text-sm">
             <thead>
-              <tr className="border-b border-line text-xs uppercase tracking-wider text-muted">
+              <tr className="border-b border-line text-sm text-muted">
                 <th scope="col" className="py-2 pr-4 font-medium">Feature</th>
                 <th scope="col" className="py-2 pr-4 font-medium">Free</th>
-                <th scope="col" className="py-2 font-medium text-violet-soft">Pro</th>
+                <th scope="col" className="py-2 font-medium text-ink">Pro</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">

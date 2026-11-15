@@ -153,7 +153,7 @@ function PricingBuilder() {
         eyebrow={<Badge tone="warn">All prices are your hypotheses — not verified market rates</Badge>}
       />
       <div className="grid gap-4 lg:grid-cols-[360px_minmax(0,1fr)]">
-        <Card>
+        <Card className="min-w-0">
           <CardTitle right={<Calculator className="h-4 w-4 text-muted" aria-hidden />} sub="For one standard project or month">
             Effort & costs
           </CardTitle>
@@ -179,12 +179,12 @@ function PricingBuilder() {
           </Button>
         </Card>
 
-        <div className="space-y-4">
+        <div className="min-w-0 space-y-4">
           <div className="grid gap-3 md:grid-cols-3">
             {p.packages.map((k, i) => (
-              <Card key={k.tier} className={k.tier === "standard" ? "border-violet/50" : undefined}>
+              <Card key={k.tier} className={k.tier === "standard" ? "min-w-0 border-violet/50 shadow-glow-lg" : "min-w-0"}>
                 <div className="mb-3 flex items-center justify-between">
-                  <Badge tone={k.tier === "standard" ? "violet" : "neutral"}>{TIER_LABEL[k.tier]}</Badge>
+                  <h3 className="text-base font-semibold text-ink">{TIER_LABEL[k.tier]}</h3>
                   {k.price < k.hours * p.hourlyTarget && <Badge tone="warn">Below your hourly target</Badge>}
                 </div>
                 <div className="space-y-3">
@@ -284,7 +284,7 @@ function PricingBuilder() {
           {saveError && <ErrorState title="Not saved" message={saveError} onRetry={save} />}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs text-muted">{savedAt ? `Saved ${formatDateTime(savedAt)}` : "Not saved yet"}</p>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {savedAt && (
                 <LinkButton href="/assignments/pricing-packages" variant="secondary">
                   Mission 4: submit your packages

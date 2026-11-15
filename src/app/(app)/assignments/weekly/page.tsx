@@ -10,7 +10,7 @@ import { cn, formatDate } from "@/lib/cn";
 import { addWeeks, CompletionNoteSchema, daysLeft, formatWeekRange, WEEKLY_CATEGORY_LABEL, weeklyStats } from "@/lib/retention";
 import type { WeeklyMission } from "@/lib/types";
 
-const DIFF_TONE = { Easy: "good", Medium: "violet", Hard: "warn" } as const;
+const DIFF_TONE = { Easy: "neutral", Medium: "neutral", Hard: "neutral" } as const;
 
 export default function WeeklyMissionsPage() {
   return (
@@ -52,18 +52,18 @@ function MissionCard({ m }: { m: WeeklyMission }) {
           <Target className="mt-0.5 h-5 w-5 shrink-0 text-violet-soft" aria-label="Not completed" />
         )}
         <span className="min-w-0 flex-1">
-          <span className="flex flex-wrap items-center gap-1.5">
+          <span className={cn("block font-semibold", done ? "text-ink-2" : "text-ink")}>{m.title}</span>
+          <span className="mt-0.5 block text-sm text-muted">{m.description}</span>
+          <span className="mt-2.5 flex flex-wrap items-center gap-1.5">
             <Badge>{WEEKLY_CATEGORY_LABEL[m.category]}</Badge>
             <Badge tone={DIFF_TONE[m.difficulty]}>{m.difficulty}</Badge>
           </span>
-          <span className={cn("mt-1.5 block font-semibold", done ? "text-ink-2" : "text-ink")}>{m.title}</span>
-          <span className="mt-0.5 block text-sm text-muted">{m.description}</span>
         </span>
         <span className="flex shrink-0 flex-col items-end gap-2">
-          <Badge tone={done ? "good" : "violet"}>
+          <span className={cn("flex items-center gap-1 text-xs font-medium", done ? "text-spark" : "text-ink-2")}>
             <Sparkles className="h-3 w-3" aria-hidden /> {done ? "+" : ""}
             {m.xp} XP
-          </Badge>
+          </span>
           <ChevronDown className={cn("h-4 w-4 text-muted transition-transform", open && "rotate-180")} aria-hidden />
         </span>
       </button>
@@ -72,7 +72,7 @@ function MissionCard({ m }: { m: WeeklyMission }) {
         <div className="mt-4 border-t border-line pt-4">
           <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_220px]">
             <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-muted">How to do it</p>
+              <h3 className="text-sm font-medium text-ink">How to do it</h3>
               <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-ink-2">
                 {m.steps.map((s) => (
                   <li key={s}>{s}</li>
@@ -103,7 +103,7 @@ function MissionCard({ m }: { m: WeeklyMission }) {
               <p className="mt-1 whitespace-pre-wrap text-ink-2">{m.completionNote}</p>
             </div>
           ) : confirming ? (
-            <div className="mt-4 rounded-xl border border-violet/30 bg-violet-tint/40 p-4">
+            <div className="mt-4 rounded-xl border border-violet/30 bg-violet-tint p-4">
               <Field label="Confirm completion — what did you do?" htmlFor={`note-${m.id}`} hint="A sentence or two is enough. Completion is self-reported, so be honest with yourself: this note is your record." error={note && !noteCheck.success ? noteCheck.error.issues[0]?.message : null}>
                 <Textarea id={`note-${m.id}`} rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Found five studios on Instagram; three post irregularly and two pay a freelancer already." />
               </Field>
@@ -152,18 +152,15 @@ function Weekly() {
       />
       <RetentionStorageNotice />
 
-      <div className="mb-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <Card className="border-violet/30 bg-gradient-to-br from-violet-tint/60 to-surface">
+      <section className="mb-4 grid gap-6 glass rounded-2xl p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center" aria-label="This week">
+        <div>
           <div className="flex items-end justify-between gap-3">
-            <div>
-              <p className="text-sm text-muted">This week</p>
-              <p className="text-3xl font-bold">
-                {week.completed}
-                <span className="text-lg font-normal text-muted"> / {week.total} missions</span>
-              </p>
-            </div>
-            <p className="text-right text-sm text-ink-2">
-              <span className="font-semibold text-violet-soft">{week.xpEarned}</span> of {week.xpAvailable} XP
+            <p className="text-ink">
+              <span className="text-[1.75rem] font-semibold leading-9 tracking-tight">{week.completed}</span>
+              <span className="text-sm text-muted"> of {week.total} missions done this week</span>
+            </p>
+            <p className="text-sm text-muted">
+              <span className="font-semibold text-spark">{week.xpEarned}</span> of {week.xpAvailable} XP
             </p>
           </div>
           <Progress value={week.percent} className="mt-3" tone={allDone ? "good" : "violet"} label="Weekly mission progress" />
@@ -173,24 +170,22 @@ function Weekly() {
               ? `All done. Your next set arrives on ${formatDate(addWeeks(week.weekStart, 1))}.`
               : `${left} day${left === 1 ? "" : "s"} left · new missions on ${formatDate(addWeeks(week.weekStart, 1))}`}
           </p>
-        </Card>
-        <Card>
-          <CardTitle sub="From your saved mission history">Weekly statistics</CardTitle>
-          <dl className="grid grid-cols-3 gap-3 text-center">
-            {[
-              { label: "Week streak", value: week.streak, icon: Flame },
-              { label: "Completed in total", value: week.totalCompleted, icon: CheckCircle2 },
-              { label: "XP from weekly missions", value: state.xp.filter((t) => t.source === "weekly_mission").reduce((a, t) => a + t.amount, 0), icon: Sparkles },
-            ].map((x) => (
-              <div key={x.label} className="rounded-xl border border-line bg-surface-2 p-3">
-                <x.icon className="mx-auto h-4 w-4 text-violet-soft" aria-hidden />
-                <dd className="mt-1 text-xl font-bold">{x.value}</dd>
-                <dt className="text-[11px] leading-tight text-muted">{x.label}</dt>
-              </div>
-            ))}
-          </dl>
-        </Card>
-      </div>
+        </div>
+        <dl className="grid grid-cols-3 divide-x divide-line border-t border-line pt-4 lg:border-l lg:border-t-0 lg:pl-2 lg:pt-0">
+          {[
+            { label: "Week streak", value: week.streak, icon: Flame },
+            { label: "Completed in total", value: week.totalCompleted, icon: CheckCircle2 },
+            { label: "XP from weekly", value: state.xp.filter((t) => t.source === "weekly_mission").reduce((a, t) => a + t.amount, 0), icon: Sparkles },
+          ].map((x) => (
+            <div key={x.label} className="flex flex-col-reverse px-4 text-center lg:min-w-[120px]">
+              <dt className="mt-0.5 flex items-center justify-center gap-1 text-xs text-muted">
+                <x.icon className="h-3 w-3" aria-hidden /> {x.label}
+              </dt>
+              <dd className="text-xl font-semibold text-ink">{x.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
 
       {week.missions.length ? (
         <div className="space-y-3">
