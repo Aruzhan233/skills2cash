@@ -14,7 +14,9 @@ import {
   type RoleplaySession,
   type ServiceOffer,
   type SkillProfile,
+  type WeeklyMission,
   type WorkspaceState,
+  type XpTransaction,
 } from "../types";
 
 export interface LearningPathRecord {
@@ -34,7 +36,46 @@ export interface Repository {
   saveSession(s: RoleplaySession): Promise<void>;
   addSnapshot(s: ReadinessSnapshot): Promise<void>;
   saveLearningPath(p: LearningPathRecord): Promise<void>;
+  /** Inserts or updates weekly missions by id. */
+  saveWeeklyMissions(ms: WeeklyMission[]): Promise<void>;
+  /** Records an XP award. Idempotent on (source, refKey): returns false when it already existed. */
+  addXp(t: XpTransaction): Promise<boolean>;
+  /**
+   * Marks a weekly mission completed and records its XP in one step. Idempotent: a mission that is
+   * already completed returns awarded = false and pays nothing.
+   */
+  completeWeeklyMission(m: WeeklyMission, note: string, completedAt: string): Promise<{ awarded: boolean; completedAt: string }>;
+  /** Where weekly missions and XP are stored. "browser" means the database tables are not available yet. */
+  retentionStorage(): "database" | "browser";
   reset(): Promise<void>;
+}
+
+function mergeMissions(cur: WeeklyMission[], ms: WeeklyMission[]): WeeklyMission[] {
+  const byId = new Map(cur.map((m) => [m.id, m]));
+  for (const m of ms) {
+    // one row per (week, template): never store the same mission twice
+    const dup = [...byId.values()].find((x) => x.id !== m.id && x.weekStart === m.weekStart && x.templateKey === m.templateKey);
+    if (!dup) byId.set(m.id, m);
+  }
+  return [...byId.values()];
+}
+
+const sameAward = (a: XpTransaction, b: XpTransaction) => a.source === b.source && a.refKey === b.refKey;
+
+/** Completion for browser-backed stores (guest, demo, local mode, or the database fallback). */
+function completeInList(
+  cur: { weeklyMissions: WeeklyMission[]; xp: XpTransaction[] },
+  m: WeeklyMission,
+  note: string,
+  completedAt: string,
+): { next: { weeklyMissions: WeeklyMission[]; xp: XpTransaction[] }; awarded: boolean; completedAt: string } {
+  const existing = cur.weeklyMissions.find((x) => x.id === m.id);
+  if (existing?.status === "completed") return { next: cur, awarded: false, completedAt: existing.completedAt ?? completedAt };
+  const done: WeeklyMission = { ...m, status: "completed", completionNote: note, completedAt };
+  const weeklyMissions = existing ? cur.weeklyMissions.map((x) => (x.id === m.id ? done : x)) : mergeMissions(cur.weeklyMissions, [done]);
+  const tx: XpTransaction = { id: crypto.randomUUID(), source: "weekly_mission", refKey: m.id, amount: m.xp, label: m.title, createdAt: completedAt };
+  const awarded = !cur.xp.some((x) => sameAward(x, tx));
+  return { next: { weeklyMissions, xp: awarded ? [...cur.xp, tx] : cur.xp }, awarded, completedAt };
 }
 
 // ------------------------------------------------------------------ local
@@ -97,6 +138,22 @@ export class LocalRepository implements Repository {
   async saveLearningPath() {
     /* derived from state in local mode */
   }
+  async saveWeeklyMissions(ms: WeeklyMission[]) {
+    this.write((s) => ({ ...s, weeklyMissions: mergeMissions(s.weeklyMissions, ms) }));
+  }
+  async addXp(t: XpTransaction) {
+    if (this.read().xp.some((x) => sameAward(x, t))) return false;
+    this.write((s) => ({ ...s, xp: [...s.xp, t] }));
+    return true;
+  }
+  async completeWeeklyMission(m: WeeklyMission, note: string, completedAt: string) {
+    const res = completeInList(this.read(), m, note, completedAt);
+    this.write((s) => ({ ...s, ...res.next }));
+    return { awarded: res.awarded, completedAt: res.completedAt };
+  }
+  retentionStorage() {
+    return "browser" as const;
+  }
   async reset() {
     this.storage.removeItem(this.key);
   }
@@ -110,12 +167,188 @@ function check<T>(res: { data: T; error: { message: string } | null }): T {
   return res.data;
 }
 
+/** PostgREST/Postgres codes meaning "this table does not exist yet" (migration not applied). */
+const MISSING_TABLE = new Set(["PGRST205", "42P01"]);
+/** "This function does not exist yet" (integrity migration not applied). */
+const MISSING_FUNCTION = new Set(["PGRST202", "42883"]);
+const codeOf = (e: unknown) => (e && typeof e === "object" && "code" in e ? String((e as { code: unknown }).code) : "");
+
 export class SupabaseRepository implements Repository {
   kind = "supabase" as const;
   constructor(
     private db: SupabaseClient,
     private userId: string,
   ) {}
+
+  /**
+   * Weekly missions and XP live in tables added by migration 20261115000000_retention.sql.
+   * Only while those tables do not exist (migration not applied) do these two collections
+   * fall back to this browser, clearly labelled in the UI. Any other database error is
+   * raised, so the app shows an error instead of pretending the data was saved.
+   */
+  private retentionLocal = false;
+  private get retentionKey() {
+    return `s2c:retention:${this.userId}`;
+  }
+  private readRetention(): { weeklyMissions: WeeklyMission[]; xp: XpTransaction[] } {
+    try {
+      const raw = JSON.parse(localStorage.getItem(this.retentionKey) || "null") as { weeklyMissions?: WeeklyMission[]; xp?: XpTransaction[] } | null;
+      return { weeklyMissions: raw?.weeklyMissions ?? [], xp: raw?.xp ?? [] };
+    } catch {
+      return { weeklyMissions: [], xp: [] };
+    }
+  }
+  private writeRetention(v: { weeklyMissions: WeeklyMission[]; xp: XpTransaction[] }) {
+    try {
+      localStorage.setItem(this.retentionKey, JSON.stringify(v));
+    } catch {
+      throw new Error("Could not save to browser storage (it may be full or disabled).");
+    }
+  }
+  retentionStorage() {
+    return this.retentionLocal ? ("browser" as const) : ("database" as const);
+  }
+
+  private async loadRetention(): Promise<{ weeklyMissions: WeeklyMission[]; xp: XpTransaction[] }> {
+    const [wm, xp] = await Promise.all([
+      this.db.from("weekly_missions").select("*").order("created_at"),
+      this.db.from("xp_transactions").select("*").order("created_at"),
+    ]);
+    if (wm.error || xp.error) {
+      if ([wm.error, xp.error].every((e) => !e || MISSING_TABLE.has(codeOf(e)))) {
+        this.retentionLocal = true;
+        return this.readRetention();
+      }
+      throw new Error(`Database error: ${(wm.error ?? xp.error)!.message}`);
+    }
+    this.retentionLocal = false;
+    // The tables exist now: move anything this browser kept while they were missing into the account, once.
+    const pending = this.readRetention();
+    if (pending.weeklyMissions.length || pending.xp.length) {
+      try {
+        await this.importRetention(pending.weeklyMissions, pending.xp);
+        localStorage.removeItem(this.retentionKey);
+        return this.loadRetention();
+      } catch {
+        /* keep the browser copy; it is retried on the next load */
+      }
+    }
+    return {
+      weeklyMissions: (wm.data as Row[]).map((r) => ({
+        id: r.id as string,
+        weekStart: r.week_start as string,
+        templateKey: r.template_key as string,
+        title: r.title as string,
+        description: r.description as string,
+        steps: (r.steps as string[]) ?? [],
+        reason: (r.reason as string) ?? "",
+        category: r.category as WeeklyMission["category"],
+        difficulty: r.difficulty as WeeklyMission["difficulty"],
+        xp: r.xp_reward as number,
+        deadline: r.deadline as string,
+        status: r.status as WeeklyMission["status"],
+        completionNote: (r.completion_note as string | null) ?? null,
+        completedAt: (r.completed_at as string | null) ?? null,
+        createdAt: r.created_at as string,
+      })),
+      xp: (xp.data as Row[]).map((r) => ({
+        id: r.id as string,
+        source: r.source as XpTransaction["source"],
+        refKey: r.ref_key as string,
+        amount: r.amount as number,
+        label: r.label as string,
+        createdAt: r.created_at as string,
+      })),
+    };
+  }
+
+  async saveWeeklyMissions(ms: WeeklyMission[]) {
+    if (!ms.length) return;
+    if (this.retentionLocal) {
+      const cur = this.readRetention();
+      this.writeRetention({ ...cur, weeklyMissions: mergeMissions(cur.weeklyMissions, ms) });
+      return;
+    }
+    check(
+      await this.db.from("weekly_missions").upsert(
+        ms.map((m) => ({
+          id: m.id,
+          user_id: this.userId,
+          week_start: m.weekStart,
+          template_key: m.templateKey,
+          title: m.title,
+          description: m.description,
+          steps: m.steps,
+          reason: m.reason,
+          category: m.category,
+          difficulty: m.difficulty,
+          xp_reward: m.xp,
+          deadline: m.deadline,
+          status: m.status,
+          completion_note: m.completionNote,
+          completed_at: m.completedAt,
+          created_at: m.createdAt,
+        })),
+        { onConflict: "id" },
+      ),
+    );
+  }
+
+  async addXp(t: XpTransaction) {
+    if (this.retentionLocal) {
+      const cur = this.readRetention();
+      if (cur.xp.some((x) => sameAward(x, t))) return false;
+      this.writeRetention({ ...cur, xp: [...cur.xp, t] });
+      return true;
+    }
+    // The unique (user_id, source, ref_key) constraint makes a repeated award a no-op.
+    const rows = check(
+      await this.db
+        .from("xp_transactions")
+        .upsert(
+          { id: t.id, user_id: this.userId, source: t.source, ref_key: t.refKey, amount: t.amount, label: t.label, created_at: t.createdAt },
+          { onConflict: "user_id,source,ref_key", ignoreDuplicates: true },
+        )
+        .select("id"),
+    ) as Row[] | null;
+    return (rows?.length ?? 0) > 0;
+  }
+
+  async completeWeeklyMission(m: WeeklyMission, note: string, completedAt: string) {
+    if (this.retentionLocal) {
+      const res = completeInList(this.readRetention(), m, note, completedAt);
+      this.writeRetention(res.next);
+      return { awarded: res.awarded, completedAt: res.completedAt };
+    }
+    // One database transaction: completes the mission and pays its stored reward exactly once.
+    const { data, error } = await this.db.rpc("complete_weekly_mission", { p_mission_id: m.id, p_note: note, p_completed_at: completedAt });
+    if (!error) {
+      const row = (Array.isArray(data) ? data[0] : data) as { awarded: boolean; completed_at: string } | null;
+      return { awarded: Boolean(row?.awarded), completedAt: row?.completed_at ?? completedAt };
+    }
+    if (!MISSING_FUNCTION.has(codeOf(error))) throw new Error(`Database error: ${error.message}`);
+    // Only the first retention migration is applied: two idempotent writes (the unique constraint still blocks double XP).
+    await this.saveWeeklyMissions([{ ...m, status: "completed", completionNote: note, completedAt }]);
+    const awarded = await this.addXp({ id: crypto.randomUUID(), source: "weekly_mission", refKey: m.id, amount: m.xp, label: m.title, createdAt: completedAt });
+    return { awarded, completedAt };
+  }
+
+  /**
+   * Copies weekly missions and XP from a browser store (guest progress, or data kept while the tables
+   * were missing) into the account. Missions are created active and completed through
+   * completeWeeklyMission, keeping their original completion time; achievement XP is added once.
+   */
+  async importRetention(missions: WeeklyMission[], xp: XpTransaction[]) {
+    // Skip missions the account already has (same id, or same week + template), so a retry never re-saves them.
+    const existing = check(await this.db.from("weekly_missions").select("id, week_start, template_key")) as Row[];
+    const fresh = missions.filter((m) => !existing.some((e) => e.id === m.id || (e.week_start === m.weekStart && e.template_key === m.templateKey)));
+    const owned = new Set([...existing.map((e) => e.id as string), ...fresh.map((m) => m.id)]);
+    if (fresh.length) await this.saveWeeklyMissions(fresh.map((m) => ({ ...m, status: "active", completionNote: null, completedAt: null })));
+    for (const m of missions.filter((x) => owned.has(x.id))) {
+      if (m.status === "completed" && m.completionNote && m.completedAt) await this.completeWeeklyMission(m, m.completionNote, m.completedAt);
+    }
+    for (const t of xp) if (t.source === "achievement") await this.addXp(t);
+  }
 
   async load(): Promise<WorkspaceState> {
     const [sp, offer, pricing, subs, sessions, messages, snaps] = await Promise.all([
@@ -132,8 +365,10 @@ export class SupabaseRepository implements Repository {
     const pricingRow = check(pricing) as Row | null;
     const msgRows = check(messages) as Row[];
     const profileRow = check(await this.db.from("profiles").select("display_name").maybeSingle()) as Row | null;
+    const retention = await this.loadRetention();
 
     return {
+      ...retention,
       profile: spRow
         ? {
             id: spRow.id as string,
@@ -320,6 +555,8 @@ export class SupabaseRepository implements Repository {
   }
 
   async reset() {
+    if (this.retentionLocal) localStorage.removeItem(this.retentionKey);
+    else for (const t of ["xp_transactions", "weekly_missions"]) check(await this.db.from(t).delete().eq("user_id", this.userId));
     for (const t of [
       "roleplay_messages",
       "roleplay_sessions",

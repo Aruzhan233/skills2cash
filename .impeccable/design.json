@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-15T12:00:00.000Z",
+  "title": "Design System: Skills2Cash",
+  "extensions": {
+    "colorMeta": {
+      "bg": { "role": "neutral", "displayName": "Night Sky", "canonical": "#08060d", "tonalRamp": ["#08060d", "#100a1c", "#1c1236", "#2a1d4a", "#3e2f63", "#6e6285", "#a69bb8", "#f8f6ff"] },
+      "rail": { "role": "neutral", "displayName": "Rail Night", "canonical": "#100a1c", "tonalRamp": ["#08060d", "#100a1c", "#1c1236", "#2a1d4a", "#3e2f63", "#6e6285", "#a69bb8", "#f8f6ff"] },
+      "surface": { "role": "neutral", "displayName": "Glass", "canonical": "rgb(24 15 44 / 0.58)", "tonalRamp": ["#08060d", "#100a1c", "#180f2c", "#261844", "#3a2666", "#6e6285", "#a69bb8", "#f8f6ff"] },
+      "surface-2": { "role": "neutral", "displayName": "Raised Glass", "canonical": "rgb(38 24 68 / 0.55)", "tonalRamp": ["#08060d", "#100a1c", "#180f2c", "#261844", "#3a2666", "#6e6285", "#a69bb8", "#f8f6ff"] },
+      "surface-3": { "role": "neutral", "displayName": "Inset Glass", "canonical": "rgb(58 38 102 / 0.5)", "tonalRamp": ["#08060d", "#100a1c", "#180f2c", "#261844", "#3a2666", "#6e6285", "#a69bb8", "#f8f6ff"] },
+      "line": { "role": "neutral", "displayName": "Lavender Hairline", "canonical": "rgb(197 167 255 / 0.11)", "tonalRamp": ["#1a1428", "#231b38", "#2e2449", "#3d3160", "#574781", "#7f6ab0", "#a68ad9", "#c5a7ff"] },
+      "line-strong": { "role": "neutral", "displayName": "Strong Hairline", "canonical": "rgb(197 167 255 / 0.2)", "tonalRamp": ["#1a1428", "#231b38", "#2e2449", "#3d3160", "#574781", "#7f6ab0", "#a68ad9", "#c5a7ff"] },
+      "ink": { "role": "neutral", "displayName": "Starlight", "canonical": "#f8f6ff", "tonalRamp": ["#3e2f63", "#5c5175", "#7f7496", "#a69bb8", "#bfb5d0", "#d5cde6", "#ebe6f5", "#f8f6ff"] },
+      "ink-2": { "role": "neutral", "displayName": "Mist", "canonical": "#d5cde6", "tonalRamp": ["#3e2f63", "#5c5175", "#7f7496", "#a69bb8", "#bfb5d0", "#d5cde6", "#ebe6f5", "#f8f6ff"] },
+      "muted": { "role": "neutral", "displayName": "Dusk", "canonical": "#a69bb8", "tonalRamp": ["#3e2f63", "#5c5175", "#7f7496", "#a69bb8", "#bfb5d0", "#d5cde6", "#ebe6f5", "#f8f6ff"] },
+      "ink-2-lit": { "role": "neutral", "displayName": "Lit Mist", "canonical": "#ebe4fb", "tonalRamp": ["#3a148c", "#5a3aa8", "#7c62c0", "#9d89d6", "#bba9e6", "#cdbfee", "#ebe4fb", "#f8f6ff"] },
+      "muted-lit": { "role": "neutral", "displayName": "Lit Dusk", "canonical": "#cdbfee", "tonalRamp": ["#3a148c", "#5a3aa8", "#7c62c0", "#9d89d6", "#bba9e6", "#cdbfee", "#ebe4fb", "#f8f6ff"] },
+      "violet": { "role": "primary", "displayName": "Horizon Violet", "canonical": "#963fff", "tonalRamp": ["#1a0a3d", "#321078", "#4b16b3", "#621fe6", "#782bff", "#963fff", "#c5a7ff", "#ebe2ff"] },
+      "violet-strong": { "role": "primary", "displayName": "Electric Violet", "canonical": "#782bff", "tonalRamp": ["#1a0a3d", "#321078", "#4b16b3", "#621fe6", "#782bff", "#963fff", "#c5a7ff", "#ebe2ff"] },
+      "violet-deep": { "role": "primary", "displayName": "Deep Night Violet", "canonical": "#321078", "tonalRamp": ["#1a0a3d", "#321078", "#4b16b3", "#621fe6", "#782bff", "#963fff", "#c5a7ff", "#ebe2ff"] },
+      "violet-soft": { "role": "primary", "displayName": "Lavender Rim", "canonical": "#c5a7ff", "tonalRamp": ["#1a0a3d", "#321078", "#4b16b3", "#621fe6", "#782bff", "#963fff", "#c5a7ff", "#ebe2ff"] },
+      "violet-tint": { "role": "primary", "displayName": "Violet Haze", "canonical": "rgb(120 43 255 / 0.16)", "tonalRamp": ["#120a26", "#1a0e38", "#22124a", "#2c175e", "#381d75", "#46248f", "#562caa", "#6a36cc"] },
+      "spark": { "role": "secondary", "displayName": "Spark Gold", "canonical": "#f2be6a", "tonalRamp": ["#2e2208", "#56400f", "#806018", "#a97f24", "#d99a3c", "#f2be6a", "#f6d293", "#fae4bd"] },
+      "good": { "role": "tertiary", "displayName": "Good", "canonical": "#3fcf8e", "tonalRamp": ["#062a1c", "#0b4c33", "#11704b", "#169463", "#22b57a", "#3fcf8e", "#76e0b0", "#aeefd1"] },
+      "warn": { "role": "tertiary", "displayName": "Warn", "canonical": "#fb923c", "tonalRamp": ["#2f1606", "#5a2b0c", "#8a4312", "#b95b18", "#e2741f", "#fb923c", "#fdb27a", "#fed2b0"] },
+      "bad": { "role": "tertiary", "displayName": "Bad", "canonical": "#f87171", "tonalRamp": ["#2f0f0f", "#5c1c1c", "#8c2b2b", "#b93c3c", "#dc5555", "#f87171", "#fca5a5", "#fecaca"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Landing headline only (2.5rem rising to 3.9rem); second line in gradient type." },
+      "headline": { "displayName": "Headline", "purpose": "Application page titles (1.75rem to 2.125rem); dashboard greeting and landing section titles run larger." },
+      "title": { "displayName": "Title", "purpose": "Card titles (h2, so Sora); lit-panel titles at 1.25rem to 1.5rem." },
+      "figure": { "displayName": "Figure", "purpose": "Large tabular numbers in the dashboard figures column, unit in 14px Dusk beside it." },
+      "body": { "displayName": "Body", "purpose": "Nearly all interface text, tabular numerals; 68ch for page subtitles." },
+      "label": { "displayName": "Label", "purpose": "Badges, hints, XP counts, rail details, chart ticks; sentence case, the 12px floor." }
+    },
+    "shadows": [
+      { "name": "float", "value": "0 18px 40px -12px rgb(0 0 0 / 0.7), 0 2px 8px -2px rgb(0 0 0 / 0.5)", "purpose": "Floating layers (menus, drawer, toasts) and chart tooltips." },
+      { "name": "glow", "value": "0 10px 30px -8px rgb(120 43 255 / 0.55), 0 2px 6px -2px rgb(20 6 50 / 0.6)", "purpose": "Primary buttons and lit icon wells." },
+      { "name": "glow-lg", "value": "0 30px 70px -24px rgb(120 43 255 / 0.6), 0 8px 24px -12px rgb(10 4 30 / 0.8)", "purpose": "The lit panel and the landing product preview." },
+      { "name": "gold", "value": "0 8px 24px -8px rgb(242 190 106 / 0.45)", "purpose": "Earned achievement medallions and the level badge." },
+      { "name": "glass-rest", "value": "inset 0 1px 0 rgb(255 255 255 / 0.06), 0 20px 40px -24px rgb(0 0 0 / 0.8)", "purpose": "Every glass panel." },
+      { "name": "glass-hover", "value": "inset 0 1px 0 rgb(255 255 255 / 0.08), 0 24px 48px -24px rgb(120 43 255 / 0.45)", "purpose": "Interactive glass on hover, with translateY(-2px)." },
+      { "name": "progress-halo", "value": "0 0 12px rgb(150 63 255 / 0.55)", "purpose": "Violet progress fills; the gold fill uses 0 0 10px rgb(242 190 106 / 0.45)." },
+      { "name": "horizon", "value": "0 -2px 0 0 rgb(229 214 255 / 0.85), 0 -10px 30px 2px rgb(197 167 255 / 0.55), 0 -40px 120px 20px rgb(150 63 255 / 0.45), 0 -120px 240px 60px rgb(120 43 255 / 0.25)", "purpose": "The horizon arc's rim and stacked glow." },
+      { "name": "focus-outline", "value": "outline: 2px solid #c5a7ff; outline-offset: 2px", "purpose": "Global :focus-visible on every interactive element." },
+      { "name": "field-focus-ring", "value": "0 0 0 4px rgb(150 63 255 / 0.2)", "purpose": "Focused inputs, with a Horizon Violet border." }
+    ],
+    "materials": [
+      { "name": "glass", "value": "background: linear-gradient(180deg, rgb(197 167 255 / 0.07), rgb(197 167 255 / 0) 40%), linear-gradient(180deg, rgb(30 18 56 / 0.62), rgb(16 10 30 / 0.62)); border: 1px solid rgb(197 167 255 / 0.13); backdrop-filter: blur(18px) saturate(140%)", "purpose": "Default panel material. backdrop-filter is declared unprefixed only; the minifier dropped the unprefixed form when both were present." },
+      { "name": "glass-float", "value": "background: linear-gradient(180deg, rgb(40 26 74 / 0.92), rgb(20 12 38 / 0.94)); border: 1px solid rgb(197 167 255 / 0.2); backdrop-filter: blur(22px) saturate(150%)", "purpose": "Menus, toasts, drawers, landing nav." },
+      { "name": "glass-lit", "value": "background: radial-gradient(120% 90% at 100% 0%, rgb(150 63 255 / 0.55), transparent 55%), radial-gradient(80% 70% at 0% 100%, rgb(50 16 120 / 0.9), transparent 70%), linear-gradient(140deg, #3a148c 0%, #26105e 55%, #160a36 100%); border: 1px solid rgb(197 167 255 / 0.32); --color-muted: #cdbfee; --color-ink-2: #ebe4fb", "purpose": "The one next action per screen. Replaces glass on a Card; re-tints secondary text inside itself." },
+      { "name": "text-gradient", "value": "linear-gradient(92deg, #e4d6ff 0%, #c5a7ff 35%, #963fff 100%) clipped to text", "purpose": "Landing headline accent and a few key words only." },
+      { "name": "sky", "value": "fixed #08060d ground; drifting radial pools of rgb(120 43 255 / 0.32), rgb(50 16 120 / 0.55), rgb(150 63 255 / 0.08); a 56px lavender grid at 4.5% masked to fade from the top", "purpose": "Atmosphere behind every application page." },
+      { "name": "lamp", "value": "radial-gradient(ellipse 60% 45% at 50% -5%, rgb(150 63 255 / 0.35), transparent 70%), radial-gradient(ellipse 40% 30% at 85% 10%, rgb(120 43 255 / 0.18), transparent 70%)", "purpose": "Top light on public pages." }
+    ],
+    "motion": [
+      { "name": "ease-out-expo", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Default easing for entrances, lifts, progress and the horizon." },
+      { "name": "rise", "value": "900ms ease-out-expo; translateY(24px) blur(6px) to rest", "purpose": "One entrance per page (page header, lit panel); landing hero staggers 120ms, 220ms, 300ms." },
+      { "name": "toast-in", "value": "420ms ease-out-expo; translateY(16px) scale(0.96) blur(4px) to rest", "purpose": "Toast entrance." },
+      { "name": "fade-in", "value": "220ms ease-out", "purpose": "User menu, mobile drawer and scrim; landing dome at 1400ms." },
+      { "name": "unlock", "value": "700ms ease-out-expo; scale 0.6 to 1.08 to 1 with a gold ring", "purpose": "Reward toast icon tile." },
+      { "name": "drift", "value": "28s ease-in-out infinite alternate; translate 2% and scale 1.06", "purpose": "The sky's light pools." },
+      { "name": "glass-hover", "value": "transform 260ms ease-out-expo, border-color 200ms, box-shadow 260ms; translateY(-2px)", "purpose": "Interactive glass cards." },
+      { "name": "button", "value": "200ms ease-out-expo on transform, filter, colours and shadow; primary lifts 1px", "purpose": "All buttons." },
+      { "name": "progress-fill", "value": "width 700ms ease-out-expo", "purpose": "Every progress bar." },
+      { "name": "horizon-follow", "value": "top and opacity 1600ms ease-out-expo; rises 25px and goes from 45% to 100% opacity across journey 0 to 100", "purpose": "The app horizon following progress." },
+      { "name": "particle-sphere", "value": "canvas rotation about 0.00008 rad per ms; lean toward pointer eased at 4% per frame; paused off-screen", "purpose": "Landing centrepiece." },
+      { "name": "reduced-motion", "value": "prefers-reduced-motion: reduce disables all transitions and animations; the particle sphere draws one still frame", "purpose": "Global rule." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The lit action: a top-lit violet gradient with a violet glow. One per panel.",
+      "html": "<button class=\"ds-btn-primary\">Open mission <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 16px;border:none;border-radius:12px;font:500 14px/1 Geist,ui-sans-serif,system-ui,sans-serif;color:#fff;cursor:pointer;white-space:nowrap;background:linear-gradient(180deg,#9a4dff 0%,#782bff 100%);box-shadow:inset 0 1px 0 rgb(255 255 255 / .25),0 10px 30px -8px rgb(120 43 255 / .55),0 2px 6px -2px rgb(20 6 50 / .6);transition:transform .2s cubic-bezier(0.16,1,0.3,1),filter .2s cubic-bezier(0.16,1,0.3,1),box-shadow .2s;}.ds-btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px);}.ds-btn-primary:active{filter:brightness(.95);transform:none;}.ds-btn-primary:focus-visible{outline:2px solid var(--color-violet-soft,#c5a7ff);outline-offset:2px;}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Glass button beside a primary action.",
+      "html": "<button class=\"ds-btn-secondary\">Sign In / Create Account</button>",
+      "css": ".ds-btn-secondary{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 16px;border-radius:12px;border:1px solid var(--color-line-strong,rgb(197 167 255 / .2));background:var(--color-surface-2,rgb(38 24 68 / .55));color:var(--color-ink,#f8f6ff);font:500 14px/1 Geist,ui-sans-serif,system-ui,sans-serif;cursor:pointer;white-space:nowrap;backdrop-filter:blur(12px);box-shadow:inset 0 1px 0 rgb(255 255 255 / .06);transition:background-color .2s,border-color .2s;}.ds-btn-secondary:hover{background:var(--color-surface-3,rgb(58 38 102 / .5));border-color:rgb(197 167 255 / .4);}.ds-btn-secondary:focus-visible{outline:2px solid var(--color-violet-soft,#c5a7ff);outline-offset:2px;}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Low-emphasis actions such as Log in or Cancel.",
+      "html": "<button class=\"ds-btn-ghost\">Log in</button>",
+      "css": ".ds-btn-ghost{display:inline-flex;align-items:center;justify-content:center;height:40px;padding:0 16px;border:none;border-radius:12px;background:transparent;color:var(--color-ink-2,#d5cde6);font:500 14px/1 Geist,ui-sans-serif,system-ui,sans-serif;cursor:pointer;transition:background-color .2s,color .2s;}.ds-btn-ghost:hover{background:var(--color-surface-2,rgb(38 24 68 / .55));color:var(--color-ink,#f8f6ff);}.ds-btn-ghost:focus-visible{outline:2px solid var(--color-violet-soft,#c5a7ff);outline-offset:2px;}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Dark translucent well; violet border and 4px ring on focus.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-field-label\" for=\"ds-f1\">Service name</label><input id=\"ds-f1\" class=\"ds-input\" placeholder=\"Monthly Reels package for local fitness studios\"><p class=\"ds-field-hint\">Specific: who it is for and what they get.</p></div>",
+      "css": ".ds-field{font-family:Geist,ui-sans-serif,system-ui,sans-serif;}.ds-field-label{display:block;margin-bottom:6px;font-size:14px;font-weight:500;color:var(--color-ink,#f8f6ff);}.ds-input{width:100%;height:40px;padding:8px 14px;border-radius:12px;border:1px solid var(--color-line-strong,rgb(197 167 255 / .2));background:rgb(12 8 24 / .6);color:var(--color-ink,#f8f6ff);font:400 14px/20px Geist,ui-sans-serif,system-ui,sans-serif;backdrop-filter:blur(12px);transition:border-color .2s,box-shadow .2s,background-color .2s;}.ds-input::placeholder{color:var(--color-muted,#a69bb8);}.ds-input:hover{border-color:rgb(197 167 255 / .35);}.ds-input:focus{outline:none;border-color:var(--color-violet,#963fff);background:rgb(18 10 36 / .8);box-shadow:0 0 0 4px rgb(150 63 255 / .2);}.ds-field-hint{margin:4px 0 0;font-size:12px;line-height:16px;color:var(--color-muted,#a69bb8);}"
+    },
+    {
+      "name": "Glass Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "The default container: translucent glass, lavender hairline, top highlight, 16px corners.",
+      "html": "<section class=\"ds-card\"><div class=\"ds-card-head\"><div><h2 class=\"ds-card-title\">This week's missions</h2><p class=\"ds-card-sub\">2 of 3 done · 80 of 160 XP</p></div><a class=\"ds-card-link\" href=\"#\">Open missions</a></div><div class=\"ds-track\"><div class=\"ds-fill\" style=\"width:66%\"></div></div></section>",
+      "css": ".ds-card{padding:24px;border-radius:16px;border:1px solid rgb(197 167 255 / .13);background:linear-gradient(180deg,rgb(197 167 255 / .07),rgb(197 167 255 / 0) 40%),linear-gradient(180deg,rgb(30 18 56 / .62),rgb(16 10 30 / .62));box-shadow:inset 0 1px 0 rgb(255 255 255 / .06),0 20px 40px -24px rgb(0 0 0 / .8);backdrop-filter:blur(18px) saturate(140%);font-family:Geist,ui-sans-serif,system-ui,sans-serif;font-variant-numeric:tabular-nums;transition:transform .26s cubic-bezier(0.16,1,0.3,1),border-color .2s,box-shadow .26s cubic-bezier(0.16,1,0.3,1);}.ds-card:hover{transform:translateY(-2px);border-color:rgb(197 167 255 / .3);box-shadow:inset 0 1px 0 rgb(255 255 255 / .08),0 24px 48px -24px rgb(120 43 255 / .45);}.ds-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;}.ds-card-title{margin:0;font:600 16px/1.375 Sora,Geist,ui-sans-serif,sans-serif;letter-spacing:-0.025em;color:var(--color-ink,#f8f6ff);}.ds-card-sub{margin:4px 0 0;font-size:14px;color:var(--color-muted,#a69bb8);}.ds-card-link{font-size:14px;color:var(--color-violet-soft,#c5a7ff);text-decoration:none;}.ds-card-link:hover{text-decoration:underline;text-underline-offset:3px;}.ds-track{height:6px;border-radius:9999px;background:rgb(255 255 255 / .07);overflow:hidden;}.ds-fill{height:100%;border-radius:9999px;background:linear-gradient(90deg,#782bff,#c5a7ff);box-shadow:0 0 12px rgb(150 63 255 / .55);transition:width .7s cubic-bezier(0.16,1,0.3,1);}"
+    },
+    {
+      "name": "Lit Panel",
+      "kind": "custom",
+      "refersTo": "card-lit",
+      "description": "The signature: the one next action per screen, deep violet lit from its top-right corner, with a cropped orb.",
+      "html": "<section class=\"ds-lit\"><span class=\"ds-orb\" aria-hidden=\"true\"></span><div class=\"ds-lit-body\"><h2 class=\"ds-lit-title\"><span>Next step: </span>Create three pricing packages</h2><p class=\"ds-lit-reason\">Your demonstrated pricing score is 25/100, so pricing practice comes first.</p><div class=\"ds-lit-actions\"><button class=\"ds-lit-btn\">Open mission</button><a href=\"#\" class=\"ds-lit-link\">See the whole learning path</a></div></div></section>",
+      "css": ".ds-lit{--color-muted:#cdbfee;--color-ink-2:#ebe4fb;position:relative;isolation:isolate;overflow:hidden;padding:28px;border-radius:16px;border:1px solid rgb(197 167 255 / .32);background:radial-gradient(120% 90% at 100% 0%,rgb(150 63 255 / .55),transparent 55%),radial-gradient(80% 70% at 0% 100%,rgb(50 16 120 / .9),transparent 70%),linear-gradient(140deg,#3a148c 0%,#26105e 55%,#160a36 100%);box-shadow:inset 0 1px 0 rgb(255 255 255 / .14),0 30px 70px -24px rgb(120 43 255 / .6),0 8px 24px -12px rgb(10 4 30 / .8);font-family:Geist,ui-sans-serif,system-ui,sans-serif;}.ds-orb{position:absolute;right:-40px;bottom:-90px;width:220px;height:220px;border-radius:50%;opacity:.8;pointer-events:none;background:radial-gradient(circle at 32% 28%,rgb(244 236 255 / .95) 0%,rgb(197 167 255 / .8) 9%,rgb(150 63 255 / .75) 30%,rgb(70 22 170 / .85) 58%,rgb(26 9 64 / .95) 78%);box-shadow:inset -18px -24px 50px rgb(8 4 22 / .75),inset 6px 8px 24px rgb(229 214 255 / .25),0 30px 80px -20px rgb(150 63 255 / .65);}.ds-lit-body{position:relative;}.ds-lit-title{margin:0;font:600 24px/1.375 Sora,Geist,ui-sans-serif,sans-serif;letter-spacing:-0.02em;color:#f8f6ff;}.ds-lit-title span{color:#c5a7ff;}.ds-lit-reason{margin:8px 0 0;max-width:60ch;font-size:14px;line-height:1.625;color:var(--color-ink-2);}.ds-lit-actions{margin-top:20px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;}.ds-lit-btn{height:48px;padding:0 24px;border:none;border-radius:12px;font:500 16px/1 Geist,ui-sans-serif,system-ui,sans-serif;color:#fff;cursor:pointer;background:linear-gradient(180deg,#9a4dff,#782bff);box-shadow:inset 0 1px 0 rgb(255 255 255 / .25),0 10px 30px -8px rgb(120 43 255 / .55);transition:filter .2s,transform .2s cubic-bezier(0.16,1,0.3,1);}.ds-lit-btn:hover{filter:brightness(1.1);transform:translateY(-1px);}.ds-lit-btn:focus-visible,.ds-lit-link:focus-visible{outline:2px solid #c5a7ff;outline-offset:2px;}.ds-lit-link{font-size:14px;color:var(--color-ink-2);text-decoration:none;}.ds-lit-link:hover{color:#f8f6ff;}"
+    },
+    {
+      "name": "Badges",
+      "kind": "chip",
+      "refersTo": "badge-neutral",
+      "description": "Round tinted pills with an inset ring, for source, score, plan and earned values.",
+      "html": "<span class=\"ds-badge\">Self-reported</span> <span class=\"ds-badge ds-badge-violet\">Week of 9–15 Nov</span> <span class=\"ds-badge ds-badge-good\">84/100</span> <span class=\"ds-badge ds-badge-warn\">Offline sample — not AI</span> <span class=\"ds-badge ds-badge-spark\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3l1.9 5.8L20 10l-6.1 1.9L12 18l-1.9-6.1L4 10l6.1-1.2z\"/></svg> 40 XP</span>",
+      "css": ".ds-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:9999px;background:var(--color-surface-3,rgb(58 38 102 / .5));color:var(--color-ink-2,#d5cde6);box-shadow:inset 0 0 0 1px rgb(197 167 255 / .11);font:500 12px/16px Geist,ui-sans-serif,system-ui,sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap;}.ds-badge-violet{background:rgb(120 43 255 / .16);color:#c5a7ff;box-shadow:inset 0 0 0 1px rgb(150 63 255 / .3);}.ds-badge-good{background:rgb(63 207 142 / .1);color:#3fcf8e;box-shadow:inset 0 0 0 1px rgb(63 207 142 / .2);}.ds-badge-warn{background:rgb(251 146 60 / .1);color:#fb923c;box-shadow:inset 0 0 0 1px rgb(251 146 60 / .2);}.ds-badge-spark{background:rgb(242 190 106 / .1);color:#f2be6a;box-shadow:inset 0 0 0 1px rgb(242 190 106 / .25);}"
+    },
+    {
+      "name": "Journey Rail",
+      "kind": "nav",
+      "refersTo": "journey-rail",
+      "description": "Six steps on one lit path: completed segments glow violet, the current step is the lamp, the next step is outlined.",
+      "html": "<nav class=\"ds-rail\"><p class=\"ds-rail-head\">Your journey</p><ol class=\"ds-rail-list\"><li class=\"ds-step ds-step-done\"><span class=\"ds-line\"></span><a href=\"#\" class=\"ds-step-link\"><span class=\"ds-marker\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg></span><span><span class=\"ds-step-label\">My Skills</span><span class=\"ds-step-detail\">Assessment complete</span></span></a></li><li class=\"ds-step ds-step-current\"><span class=\"ds-line\"></span><a href=\"#\" class=\"ds-step-link\" aria-current=\"page\"><span class=\"ds-marker\">2</span><span><span class=\"ds-step-label\">Learning Path</span><span class=\"ds-step-detail\">Stage 3 of 5</span></span></a></li><li class=\"ds-step ds-step-next\"><a href=\"#\" class=\"ds-step-link\"><span class=\"ds-marker\">3</span><span><span class=\"ds-step-label\">Service Builder <em>Next</em></span><span class=\"ds-step-detail\">Not started</span></span></a></li></ol></nav>",
+      "css": ".ds-rail{width:264px;padding:8px 12px 16px;background:linear-gradient(180deg,rgb(30 14 64 / .75),rgb(16 10 28 / .8) 40%);border-right:1px solid rgb(197 167 255 / .11);backdrop-filter:blur(24px);font-family:Geist,ui-sans-serif,system-ui,sans-serif;}.ds-rail-head{margin:0 0 4px;padding:0 12px;font-size:12px;font-weight:500;color:var(--color-muted,#a69bb8);}.ds-rail-list{list-style:none;margin:0;padding:0;}.ds-step{position:relative;}.ds-line{position:absolute;left:23px;top:34px;height:calc(100% - 22px);width:1px;background:rgb(197 167 255 / .2);}.ds-step-done .ds-line{background:linear-gradient(180deg,#c5a7ff,#782bff);box-shadow:0 0 8px rgb(150 63 255 / .8);}.ds-step-link{position:relative;display:flex;align-items:flex-start;gap:12px;padding:8px 12px;border-radius:8px;text-decoration:none;transition:background-color .15s;}.ds-step-link:hover{background:rgb(38 24 68 / .55);}.ds-step-current .ds-step-link{background:linear-gradient(90deg,rgb(120 43 255 / .3),rgb(120 43 255 / .05));box-shadow:inset 0 0 0 1px rgb(150 63 255 / .3);}.ds-step-link:focus-visible{outline:2px solid #c5a7ff;outline-offset:2px;}.ds-marker{position:relative;z-index:1;margin-top:2px;display:grid;place-items:center;width:22px;height:22px;flex-shrink:0;box-sizing:border-box;border-radius:9999px;border:1px solid rgb(197 167 255 / .2);background:#100a1c;color:#a69bb8;font-size:12px;font-weight:600;}.ds-step-done .ds-marker{border:none;background:linear-gradient(180deg,#a45cff,#782bff);color:#fff;box-shadow:0 2px 10px rgb(150 63 255 / .6);}.ds-step-current .ds-marker{border:none;background:#782bff;color:#fff;box-shadow:0 0 0 4px rgb(150 63 255 / .25),0 2px 12px rgb(150 63 255 / .7);}.ds-step-next .ds-marker{border-color:#963fff;background:rgb(120 43 255 / .16);color:#c5a7ff;box-shadow:0 0 0 4px rgb(150 63 255 / .15);}.ds-step-label{display:block;font-size:14px;color:#a69bb8;}.ds-step-label em{margin-left:6px;font-style:normal;font-size:12px;font-weight:500;color:#c5a7ff;}.ds-step-done .ds-step-label{color:#d5cde6;}.ds-step-current .ds-step-label{color:#f8f6ff;font-weight:500;}.ds-step-detail{display:block;font-size:12px;color:#a69bb8;}"
+    },
+    {
+      "name": "Level Card",
+      "kind": "custom",
+      "refersTo": "progress-track",
+      "description": "Earned gold: level medallion, XP count and a gold progress fill on glass.",
+      "html": "<div class=\"ds-level\"><div class=\"ds-level-row\"><span class=\"ds-medal\">2</span><p class=\"ds-level-name\">Level 2 · Builder</p><p class=\"ds-level-xp\">275 XP</p></div><div class=\"ds-gtrack\"><div class=\"ds-gfill\" style=\"width:85%\"></div></div><p class=\"ds-level-note\">225 / 250 XP · 25 XP to level 3</p></div>",
+      "css": ".ds-level{width:320px;padding:20px;border-radius:16px;border:1px solid rgb(197 167 255 / .13);background:linear-gradient(180deg,rgb(30 18 56 / .62),rgb(16 10 30 / .62));box-shadow:inset 0 1px 0 rgb(255 255 255 / .06);backdrop-filter:blur(18px) saturate(140%);font-family:Geist,ui-sans-serif,system-ui,sans-serif;font-variant-numeric:tabular-nums;}.ds-level-row{display:flex;align-items:center;gap:12px;}.ds-medal{display:grid;place-items:center;width:48px;height:48px;flex-shrink:0;border-radius:16px;background:radial-gradient(circle at 35% 30%,rgb(242 190 106 / .4),rgb(242 190 106 / .08));box-shadow:inset 0 0 0 1px rgb(242 190 106 / .35),0 8px 24px -8px rgb(242 190 106 / .45);font:600 20px/1 Sora,Geist,sans-serif;color:#f2be6a;}.ds-level-name{flex:1;margin:0;font-weight:600;color:#f8f6ff;}.ds-level-xp{margin:0;font-size:14px;font-weight:600;color:#f2be6a;}.ds-gtrack{margin-top:12px;height:6px;border-radius:9999px;background:rgb(255 255 255 / .07);overflow:hidden;}.ds-gfill{height:100%;border-radius:9999px;background:linear-gradient(90deg,#d99a3c,#f2be6a);box-shadow:0 0 10px rgb(242 190 106 / .45);transition:width .7s cubic-bezier(0.16,1,0.3,1);}.ds-level-note{margin:6px 0 0;font-size:12px;color:#a69bb8;}"
+    },
+    {
+      "name": "Reward Toast",
+      "kind": "custom",
+      "refersTo": "toast-reward",
+      "description": "Float glass with a spark border; the gold icon tile plays the unlock animation.",
+      "html": "<div class=\"ds-toast\" role=\"status\"><span class=\"ds-toast-icon\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"8\" r=\"6\"/><path d=\"M15.477 12.89 17 22l-5-3-5 3 1.523-9.11\"/></svg></span><div class=\"ds-toast-text\"><p class=\"ds-toast-title\">Achievement unlocked: First Mission</p><p class=\"ds-toast-body\">+50 XP</p></div></div>",
+      "css": ".ds-toast{display:flex;align-items:flex-start;gap:12px;width:360px;padding:12px;border-radius:16px;border:1px solid rgb(242 190 106 / .35);background:linear-gradient(180deg,rgb(40 26 74 / .92),rgb(20 12 38 / .94));box-shadow:inset 0 1px 0 rgb(255 255 255 / .08),0 18px 40px -12px rgb(0 0 0 / .7),0 2px 8px -2px rgb(0 0 0 / .5);backdrop-filter:blur(22px) saturate(150%);font-family:Geist,ui-sans-serif,system-ui,sans-serif;animation:ds-toast-in .42s cubic-bezier(0.16,1,0.3,1);}.ds-toast-icon{display:grid;place-items:center;width:36px;height:36px;flex-shrink:0;border-radius:8px;background:rgb(242 190 106 / .15);color:#f2be6a;box-shadow:0 8px 24px -8px rgb(242 190 106 / .45);}.ds-toast-title{margin:0;font-size:14px;font-weight:600;color:#f8f6ff;}.ds-toast-body{margin:2px 0 0;font-size:12px;color:#d5cde6;}@keyframes ds-toast-in{from{opacity:0;transform:translateY(16px) scale(.96);filter:blur(4px);}to{opacity:1;transform:none;filter:none;}}@media (prefers-reduced-motion:reduce){.ds-toast{animation:none;}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Rising Horizon",
+    "overview": "Your skill is a light source. Every screen sits on a night sky with a violet planet-edge of light rising behind the top of the page, and the further the user moves along the journey the higher and brighter that horizon sits. Glass panels float over the sky with a lavender hairline and a soft top highlight, so the atmosphere reads through the work instead of being walled off behind grey boxes. On each application screen exactly one panel is lit: a deep-violet panel lit from its top-right corner that holds the next action.\n\nLight is meaning. Violet light marks action, the current step and selection; the completed stretches of the journey rail glow violet; progress fills are violet-to-lavender bars with a soft halo. Gold light is a separate, rarer currency: it appears only on XP, levels and achievements, things the user has actually earned. Good, warn and bad are status colours and nothing else. Sora carries display and headings, Geist carries everything else, and every number is tabular.\n\nThe landing page (Persuade) carries the strongest atmosphere: a huge particle sphere rising from below the hero, gradient type on the headline accent, and a glass product preview emerging under the arc. The application (Operate) keeps the same world at lower volume: a fixed sky with slowly drifting light pools and a faint masked grid, the horizon arc fading out before mid-page content, glass cards and one lit panel.",
+    "keyCharacteristics": [
+      "Dark only, on a night-sky ground (#08060D) with a deeper violet-black rail.",
+      "Translucent glass surfaces over a living sky; the sky, horizon and grid are fixed atmosphere, never content.",
+      "One lit deep-violet panel per application screen, holding the next action.",
+      "Violet light for action, current step, selection and progress; gold light only for earned XP, levels and achievements; good, warn and bad for status only.",
+      "Sora display and headings, Geist text, tabular numerals, a 12px floor.",
+      "Exponential ease-out motion: one entrance rise, hover lift on glass, animated progress fills; everything static under reduced motion."
+    ],
+    "rules": [
+      { "name": "The Translucent Surface Rule", "body": "Surface, line and tint tokens are translucent so the sky reads through them. Never replace them with opaque hex; a surface that hides the atmosphere breaks the world.", "section": "colors" },
+      { "name": "The One Lit Panel Rule", "body": "Each application screen has at most one lit deep-violet panel, and it holds the next action. Everything else is glass.", "section": "colors" },
+      { "name": "The Earned Gold Rule", "body": "Gold appears only on things the user has earned or is earning: XP, levels, achievements, reward toasts. A greyed XP count turns gold when the mission is completed.", "section": "colors" },
+      { "name": "The Honest Status Rule", "body": "Good, warn and bad describe state only. Warn labels what is unverified and is never used to draw the eye.", "section": "colors" },
+      { "name": "The 12px Floor Rule", "body": "Nothing in the interface is set below 12px, chart ticks and tooltips included.", "section": "typography" },
+      { "name": "The Tabular Figures Rule", "body": "Numerals are tabular everywhere (set on `body`). A number sits as plain text with its unit in muted 14px beside it.", "section": "typography" },
+      { "name": "The Earned Gradient Type Rule", "body": "Gradient type (pale lavender through #C5A7FF to #963FFF) is reserved for the landing headline accent and a few key words: one or two words in a landing section title, the demo persona's name, and the user's first name in the dashboard greeting. Never a whole heading, never body text, never a button label.", "section": "typography" },
+      { "name": "The Title First Rule", "body": "Nothing sits above a page title to announce it. Page meta (week, disclaimers, source badges) follows the title.", "section": "typography" },
+      { "name": "The Light Means Something Rule", "body": "Violet glow marks action, the current step and progress; gold glow marks reward. Nothing glows for decoration alone outside the sky, the horizon and the landing hero.", "section": "elevation" },
+      { "name": "The Unprefixed Blur Rule", "body": "Hand-written glass materials declare `backdrop-filter` unprefixed only. The minifier dropped the unprefixed property when both forms were present.", "section": "elevation" },
+      { "name": "The Lit Replaces Glass Rule", "body": "A lit panel replaces the glass material rather than stacking on it, and re-tints secondary text inside itself.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep every surface, line and tint translucent so the sky reads through.",
+      "Do give each application screen at most one lit panel, and put the next action in it.",
+      "Do use violet light for action, current step, selection and progress, and gold only for XP, levels and achievements.",
+      "Do set h1 and h2 in Sora and everything else in Geist, with tabular numerals and nothing below 12px.",
+      "Do keep the horizon behind the top of the page, masked out by about 420px below the header, and let it follow journey progress.",
+      "Do use exponential ease-out (cubic-bezier(0.16, 1, 0.3, 1)) for entrances, lifts and progress fills, and keep everything static under reduced motion.",
+      "Do declare `backdrop-filter` unprefixed only in hand-written glass materials.",
+      "Do keep the 2px Lavender Rim focus outline on every interactive element.",
+      "Do label sample and demo content as sample wherever it appears."
+    ],
+    "donts": [
+      "Don't replace translucent surface tokens with opaque grey boxes.",
+      "Don't stack the glass material under a lit panel; the lit panel replaces it.",
+      "Don't use gradient type on whole headings, body text or buttons; it belongs to the landing headline accent and a few key words.",
+      "Don't use spark gold for actions, links or decoration, or good, warn and bad for anything but status.",
+      "Don't let the horizon or sky glows cross mid-page headings or sit behind dense content.",
+      "Don't put kickers or eyebrow labels above titles.",
+      "Don't set any text below 12px.",
+      "Don't show placeholder or invented progress, scores, testimonials or customer logos."
+    ]
+  }
+}

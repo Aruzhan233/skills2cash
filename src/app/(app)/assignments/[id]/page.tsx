@@ -158,7 +158,7 @@ function Mission() {
                         <span className="font-medium">
                           {c.label} <span className="text-xs font-normal text-muted">· {COMPETENCIES[c.competency].label}</span>
                         </span>
-                        <span className="font-mono">{r?.score == null ? "n/a" : `${r.score}/5`}</span>
+                        <span className="font-medium tabular-nums">{r?.score == null ? "n/a" : `${r.score}/5`}</span>
                       </div>
                       <Progress value={r?.score == null ? null : levelToPercent(r.score)} className="mt-1.5" label={c.label} />
                       <p className="mt-1.5 text-sm text-ink-2">{r?.comment}</p>

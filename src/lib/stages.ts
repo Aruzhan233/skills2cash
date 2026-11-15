@@ -72,7 +72,7 @@ export const STAGES: StageDef[] = [
       before: "$50 because others charge that.",
       after: "Standard $200: 10 Reels, 2 revision rounds, ~6 hours + music licence. I'll test it with 5 studio owners this month.",
     },
-    tool: { href: "/pricing", label: "Pricing Builder" },
+    tool: { href: "/service-builder/pricing", label: "Pricing Builder" },
     completion: "Pricing worksheet saved, plus Mission 4 scored 60 or higher.",
   },
   {

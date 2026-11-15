@@ -134,6 +134,43 @@ export interface ReadinessSnapshot {
   createdAt: string;
 }
 
+export const WEEKLY_CATEGORIES = ["research", "offer", "pricing", "portfolio", "sales", "outreach"] as const;
+export type WeeklyCategory = (typeof WEEKLY_CATEGORIES)[number];
+export type WeeklyDifficulty = "Easy" | "Medium" | "Hard";
+
+/** A personalised real-world task issued for one calendar week. Completion is self-reported. */
+export interface WeeklyMission {
+  id: string;
+  /** Monday of the week it belongs to, YYYY-MM-DD (user's local time). */
+  weekStart: string;
+  templateKey: string;
+  title: string;
+  description: string;
+  steps: string[];
+  /** Why this mission was picked for this user. */
+  reason: string;
+  category: WeeklyCategory;
+  difficulty: WeeklyDifficulty;
+  xp: number;
+  deadline: string;
+  status: "active" | "completed";
+  completionNote: string | null;
+  completedAt: string | null;
+  createdAt: string;
+}
+
+export type XpSource = "achievement" | "weekly_mission";
+
+/** One XP award. (source, refKey) is unique per user, so a reward can never be granted twice. */
+export interface XpTransaction {
+  id: string;
+  source: XpSource;
+  refKey: string;
+  amount: number;
+  label: string;
+  createdAt: string;
+}
+
 export interface WorkspaceState {
   profile: SkillProfile | null;
   offer: ServiceOffer | null;
@@ -141,6 +178,8 @@ export interface WorkspaceState {
   submissions: AssignmentSubmission[];
   sessions: RoleplaySession[];
   snapshots: ReadinessSnapshot[];
+  weeklyMissions: WeeklyMission[];
+  xp: XpTransaction[];
 }
 
 export const EMPTY_STATE: WorkspaceState = {
@@ -150,4 +189,6 @@ export const EMPTY_STATE: WorkspaceState = {
   submissions: [],
   sessions: [],
   snapshots: [],
+  weeklyMissions: [],
+  xp: [],
 };

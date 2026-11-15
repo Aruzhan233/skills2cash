@@ -5,7 +5,8 @@ import { getSupabase, supabaseConfigured } from "@/lib/client/supabase";
 import { LocalRepository, SupabaseRepository, type Repository } from "@/lib/client/repository";
 import { buildDemoState } from "@/lib/demo";
 import { newId } from "@/lib/id";
-import { computeReadiness, currentStage, stageProgress } from "@/lib/progress";
+import { achievements, computeReadiness, currentStage, stageProgress } from "@/lib/progress";
+import { CompletionNoteSchema, generateWeeklyMissions, levelFor, totalXp, weekStartOf } from "@/lib/retention";
 import {
   EMPTY_STATE,
   READINESS_KEYS,
@@ -16,7 +17,9 @@ import {
   type RoleplaySession,
   type ServiceOffer,
   type SkillProfile,
+  type WeeklyMission,
   type WorkspaceState,
+  type XpTransaction,
 } from "@/lib/types";
 
 type AuthStatus = "loading" | "signed_in" | "signed_out" | "disabled";
@@ -40,7 +43,20 @@ function persistGuestUsage(usage: GuestUsage) {
   } catch { throw new Error("Could not save guest plan usage in browser storage."); }
 }
 
+export interface Toast {
+  id: string;
+  kind: "achievement" | "xp" | "level" | "warn";
+  title: string;
+  body?: string;
+}
+
 interface WorkspaceCtx {
+  /** Marks a weekly mission as done (self-reported, with a short note) and awards its XP once. */
+  completeWeeklyMission: (id: string, note: string) => Promise<void>;
+  /** "browser" when weekly missions and XP cannot be stored in the database yet. */
+  retentionStorage: "database" | "browser";
+  toasts: Toast[];
+  dismissToast: (id: string) => void;
   mode: Mode;
   guest: boolean;
   guestUsage: GuestUsage;
@@ -193,6 +209,68 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     };
   }, [repo, mode, auth.status, guest, nonce]);
 
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const pushToasts = useCallback((ts: Array<Omit<Toast, "id">>) => {
+    if (ts.length) setToasts((cur) => [...cur, ...ts.map((t) => ({ ...t, id: newId() }))].slice(-4));
+  }, []);
+  const dismissToast = useCallback((id: string) => setToasts((cur) => cur.filter((t) => t.id !== id)), []);
+
+  // Weekly missions: issue this week's personalised set the first time the workspace is opened in a new week.
+  const issuing = useRef<string | null>(null);
+  useEffect(() => {
+    if (status !== "ready" || !repo || !state.profile) return;
+    const week = weekStartOf(new Date());
+    const tag = `${week}:${state.profile.id}`;
+    if (issuing.current === tag) return;
+    const fresh = generateWeeklyMissions(state, week, newId);
+    if (!fresh.length) return;
+    issuing.current = tag;
+    repo
+      .saveWeeklyMissions(fresh)
+      .then(() => setState((cur) => ({ ...cur, weeklyMissions: [...cur.weeklyMissions.filter((m) => !fresh.some((f) => f.id === m.id)), ...fresh] })))
+      .catch((e: Error) => pushToasts([{ kind: "warn", title: "Weekly missions could not be saved", body: e.message }]));
+  }, [status, repo, state, pushToasts]);
+
+  // Achievements: when real activity unlocks one, record its XP exactly once and notify.
+  const awarding = useRef(false);
+  const failedAwards = useRef(new Set<string>());
+  useEffect(() => {
+    if (status !== "ready" || !repo || awarding.current) return;
+    const pending = achievements(state).filter(
+      (a) => a.earned && !state.xp.some((t) => t.source === "achievement" && t.refKey === a.key) && !failedAwards.current.has(a.key),
+    );
+    if (!pending.length) return;
+    awarding.current = true;
+    void (async () => {
+      const before = levelFor(totalXp(stateRef.current.xp)).level;
+      const added: XpTransaction[] = [];
+      let failure: string | null = null;
+      for (const a of pending) {
+        const tx: XpTransaction = { id: newId(), source: "achievement", refKey: a.key, amount: a.xp, label: a.title, createdAt: a.earnedAt ?? new Date().toISOString() };
+        try {
+          await repo.addXp(tx); // false = already recorded elsewhere; still reflect it locally
+          added.push(tx);
+        } catch (e) {
+          failedAwards.current.add(a.key);
+          failure = (e as Error).message;
+        }
+      }
+      if (added.length) {
+        setState((cur) => ({ ...cur, xp: [...cur.xp, ...added.filter((t) => !cur.xp.some((x) => x.source === t.source && x.refKey === t.refKey))] }));
+        const gained = added.reduce((n, t) => n + t.amount, 0);
+        const after = levelFor(totalXp(stateRef.current.xp) + gained);
+        pushToasts([
+          added.length === 1
+            ? { kind: "achievement", title: `Achievement unlocked: ${added[0].label}`, body: `+${added[0].amount} XP` }
+            : { kind: "achievement", title: `${added.length} achievements unlocked`, body: `${added.map((t) => t.label).join(", ")} · +${gained} XP` },
+          ...(after.level > before ? [{ kind: "level" as const, title: `Level ${after.level} — ${after.title}`, body: `${after.toNext} XP to the next level` }] : []),
+        ]);
+      }
+      if (failure) pushToasts([{ kind: "warn", title: "Some XP could not be saved", body: failure }]);
+      awarding.current = false;
+    })();
+  }, [status, repo, state, pushToasts]);
+
   const requireRepo = useCallback((): Repository => {
     if (!repo) throw new Error("Choose Continue as Guest or sign in to save your progress.");
     return repo;
@@ -225,7 +303,50 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     [requireRepo],
   );
 
+  const completingMissions = useRef(new Set<string>());
+  const completeMission = async (id: string, note: string) => {
+    const r = requireRepo();
+    const mission = stateRef.current.weeklyMissions.find((m) => m.id === id);
+    if (!mission) throw new Error("This mission no longer exists. Reload the page.");
+    if (mission.status === "completed") throw new Error("This mission is already completed.");
+    if (new Date(mission.deadline).getTime() < Date.now()) throw new Error("This mission's deadline has passed. It may come back in a future week.");
+    const parsed = CompletionNoteSchema.safeParse(note);
+    if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Add a short note about what you did.");
+    // One step: the mission is completed and its XP recorded together (atomically in the database).
+    const result = await r.completeWeeklyMission(mission, parsed.data, new Date().toISOString());
+    const done: WeeklyMission = { ...mission, status: "completed", completionNote: parsed.data, completedAt: result.completedAt };
+    const tx: XpTransaction = { id: newId(), source: "weekly_mission", refKey: mission.id, amount: mission.xp, label: mission.title, createdAt: result.completedAt };
+    const before = levelFor(totalXp(stateRef.current.xp));
+    const isNew = result.awarded;
+    setState((cur) => ({
+      ...cur,
+      weeklyMissions: cur.weeklyMissions.map((m) => (m.id === id ? done : m)),
+      // Reflect the award locally even if it was already recorded (e.g. completed on another device); toast only when new.
+      xp: !cur.xp.some((x) => x.source === tx.source && x.refKey === tx.refKey) ? [...cur.xp, tx] : cur.xp,
+    }));
+    if (isNew) {
+      const after = levelFor(before.xp + tx.amount);
+      pushToasts([
+        { kind: "xp", title: "Mission completed", body: `${mission.title} · +${mission.xp} XP` },
+        ...(after.level > before.level ? [{ kind: "level" as const, title: `Level ${after.level} — ${after.title}`, body: `${after.toNext} XP to the next level` }] : []),
+      ]);
+    }
+  };
+
   const ctx: WorkspaceCtx = {
+    toasts,
+    dismissToast,
+    retentionStorage: repo?.retentionStorage() ?? "browser",
+    completeWeeklyMission: async (id, note) => {
+      // One request per mission at a time: rapid repeat clicks are ignored (the database pays once regardless).
+      if (completingMissions.current.has(id)) return;
+      completingMissions.current.add(id);
+      try {
+        await completeMission(id, note);
+      } finally {
+        completingMissions.current.delete(id);
+      }
+    },
     mode: mode ?? "live",
     guest,
     guestUsage,
@@ -261,6 +382,11 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       for (const item of sourceState.sessions) if (!targetSessions.has(item.id)) await target.saveSession(item);
       const targetSnapshotIds = new Set(targetState.snapshots.map((item) => item.id));
       for (const item of sourceState.snapshots) if (!targetSnapshotIds.has(item.id)) await target.addSnapshot(item);
+      // Weekly missions and XP: skip anything the account already has (same week + mission, or same award).
+      const hasMission = (m: WeeklyMission) => targetState.weeklyMissions.some((t) => t.id === m.id || (t.weekStart === m.weekStart && t.templateKey === m.templateKey));
+      const movedMissions = sourceState.weeklyMissions.filter((m) => !hasMission(m));
+      // Completed missions are re-completed in the account (keeping their time), which records their XP exactly once.
+      await target.importRetention(movedMissions, sourceState.xp);
       localStorage.removeItem(GUEST_MODE_KEY);
       localStorage.removeItem(GUEST_DATA_KEY);
       setGuest(false);

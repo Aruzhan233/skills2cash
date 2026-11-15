@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { Check, MessagesSquare, Sparkles } from "lucide-react";
 import { RequireProfile } from "@/components/require-profile";
@@ -22,7 +23,7 @@ import {
 import { useWorkspace } from "@/components/workspace";
 import { callAI, offlineAI, type ApiError } from "@/lib/client/ai";
 import { newId } from "@/lib/id";
-import { formatDateTime } from "@/lib/cn";
+import { cn, formatDateTime } from "@/lib/cn";
 import {
   OFFER_TEXT_FIELDS,
   PRICING_MODELS,
@@ -153,6 +154,30 @@ function Builder() {
   }
 
   const standard = ws.state.pricing?.packages.find((p) => p.tier === "standard");
+  const sectionDone = (fields: OfferTextField[]) => fields.every((f) => draft[f].trim().length > 0);
+
+  const renderField = (f: OfferTextField) => {
+    const meta = LABELS[f];
+    const sug = ai?.result.suggestions[f];
+    const wide = (meta.rows ?? 1) > 1 || f === "title";
+    return (
+      <Field key={f} label={meta.label} hint={meta.hint} htmlFor={f} error={errors[f]} className={wide ? "sm:col-span-2" : undefined}>
+        {(meta.rows ?? 1) > 1 ? (
+          <Textarea id={f} rows={meta.rows} value={draft[f]} onChange={(e) => set(f, e.target.value)} />
+        ) : (
+          <Input id={f} value={draft[f]} onChange={(e) => set(f, e.target.value)} />
+        )}
+        {sug && sug !== draft[f] && (
+          <div className="mt-2 rounded-lg border border-violet/30 bg-violet-tint p-2.5 text-sm">
+            <p className="text-ink-2">{sug}</p>
+            <button className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-violet-soft hover:underline" onClick={() => set(f, sug)}>
+              <Check className="h-3 w-3" aria-hidden /> Use suggestion
+            </button>
+          </div>
+        )}
+      </Field>
+    );
+  };
 
   return (
     <div>
@@ -166,38 +191,23 @@ function Builder() {
         }
       />
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_380px]">
-        <Card>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Skill" htmlFor="skill" error={errors.skill}>
-              <Input id="skill" value={draft.skill} onChange={(e) => set("skill", e.target.value)} />
-            </Field>
-            {OFFER_TEXT_FIELDS.filter((f) => f !== "priceRationale").map((f) => {
-              const meta = LABELS[f];
-              const sug = ai?.result.suggestions[f];
-              const wide = (meta.rows ?? 1) > 1 || f === "title";
-              return (
-                <Field key={f} label={meta.label} hint={meta.hint} htmlFor={f} error={errors[f]} className={wide ? "sm:col-span-2" : undefined}>
-                  {(meta.rows ?? 1) > 1 ? (
-                    <Textarea id={f} rows={meta.rows} value={draft[f]} onChange={(e) => set(f, e.target.value)} />
-                  ) : (
-                    <Input id={f} value={draft[f]} onChange={(e) => set(f, e.target.value)} />
-                  )}
-                  {sug && sug !== draft[f] && (
-                    <div className="mt-2 rounded-lg border border-violet/30 bg-violet-tint/50 p-2.5 text-sm">
-                      <p className="text-ink-2">{sug}</p>
-                      <button className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-violet-soft hover:underline" onClick={() => set(f, sug)}>
-                        <Check className="h-3 w-3" aria-hidden /> Use suggestion
-                      </button>
-                    </div>
-                  )}
-                </Field>
-              );
-            })}
-            <div className="sm:col-span-2 rounded-xl border border-line bg-surface-2 p-4">
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm font-medium">Pricing</p>
-                <Badge tone="warn">Price hypothesis — validate with real clients</Badge>
-              </div>
+        <Card className="min-w-0">
+          <div className="space-y-8">
+            <OfferSection n={1} title="Who it is for" text="The skill you sell, what you call it, and the person who has the problem." complete={sectionDone(["title", "targetCustomer", "customerProblem"]) && !!draft.skill.trim()}>
+              <Field label="Skill" htmlFor="skill" error={errors.skill}>
+                <Input id="skill" value={draft.skill} onChange={(e) => set("skill", e.target.value)} />
+              </Field>
+              {(["title", "targetCustomer", "customerProblem"] as const).map(renderField)}
+            </OfferSection>
+            <OfferSection n={2} title="What they get" text="The outcome, the countable deliverables and how the work runs." complete={sectionDone(["outcome", "deliverables", "scope", "timeline", "revisionPolicy"])}>
+              {(["outcome", "deliverables", "scope", "timeline", "revisionPolicy"] as const).map(renderField)}
+            </OfferSection>
+            <OfferSection n={3} title="Why you, and the limits" text="An honest reason to choose you, and what the service does not include." complete={sectionDone(["uvp", "exclusions"])}>
+              {(["uvp", "exclusions"] as const).map(renderField)}
+            </OfferSection>
+            <OfferSection n={4} title="Price" text="A starting price you can explain. Work it out in the Pricing Builder if you are unsure." complete={!!draft.priceAmount && !!draft.priceUnit.trim() && !!draft.priceRationale.trim()}>
+            <div className="sm:col-span-2">
+              <Badge tone="warn" className="mb-3">Price hypothesis — validate with real clients</Badge>
               <div className="grid gap-3 sm:grid-cols-3">
                 <Field label="Pricing model" htmlFor="model">
                   <Select id="model" value={draft.pricingModel} onChange={(e) => set("pricingModel", e.target.value as Draft["pricingModel"])}>
@@ -220,10 +230,19 @@ function Builder() {
                   Use Standard package price from Pricing Builder (${standard.price})
                 </button>
               )}
+              {!standard && (
+                <p className="mt-2 text-xs text-muted">
+                  Not sure what to charge?{" "}
+                  <Link href="/service-builder/pricing" className="font-medium text-violet-soft hover:underline">
+                    Work it out in the Pricing Builder
+                  </Link>{" "}
+                  — save your offer first so your edits are kept.
+                </p>
+              )}
               <Field label={LABELS.priceRationale.label} hint={LABELS.priceRationale.hint} htmlFor="priceRationale" error={errors.priceRationale} className="mt-3">
                 <Textarea id="priceRationale" rows={3} value={draft.priceRationale} onChange={(e) => set("priceRationale", e.target.value)} />
                 {ai?.result.suggestions.priceRationale && ai.result.suggestions.priceRationale !== draft.priceRationale && (
-                  <div className="mt-2 rounded-lg border border-violet/30 bg-violet-tint/50 p-2.5 text-sm">
+                  <div className="mt-2 rounded-lg border border-violet/30 bg-violet-tint p-2.5 text-sm">
                     <p className="text-ink-2">{ai.result.suggestions.priceRationale}</p>
                     <button
                       className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-violet-soft hover:underline"
@@ -235,13 +254,14 @@ function Builder() {
                 )}
               </Field>
             </div>
+            </OfferSection>
           </div>
           {saveError && (
             <div className="mt-4">
               <ErrorState title="Not saved" message={saveError} onRetry={Object.keys(errors).length ? undefined : save} />
             </div>
           )}
-          <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5">
             <p className="text-xs text-muted">
               {savedAt ? `Saved ${formatDateTime(savedAt)}` : "Not saved yet"}
               {dirty && " · unsaved changes"}
@@ -259,7 +279,7 @@ function Builder() {
           </div>
         </Card>
 
-        <div className="space-y-4">
+        <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
           {aiBusy && (
             <Card>
               <Spinner label="Improving your offer…" />
@@ -289,7 +309,7 @@ function Builder() {
                   <li key={n}>{n}</li>
                 ))}
               </ul>
-              <p className="mt-3 text-xs font-medium text-warn">Assumptions to validate</p>
+              <h3 className="mt-4 text-sm font-medium text-warn">Assumptions to validate</h3>
               <ul className="mt-1 list-disc space-y-0.5 pl-4 text-sm text-ink-2">
                 {ai.result.assumptions_to_validate.map((n) => (
                   <li key={n}>{n}</li>
@@ -302,10 +322,10 @@ function Builder() {
           )}
           <Card>
             <CardTitle sub="Live preview of what you're building">Service Offer Canvas</CardTitle>
-            <dl className="space-y-2.5 text-sm">
+            <dl className="space-y-3 text-sm">
               <div>
                 <dt className="text-xs text-muted">Offer</dt>
-                <dd className="font-semibold">{draft.title || "—"}</dd>
+                <dd className="font-semibold text-ink">{draft.title || "—"}</dd>
               </div>
               {(
                 [
@@ -335,5 +355,31 @@ function Builder() {
         </div>
       </div>
     </div>
+  );
+}
+
+function OfferSection({ n, title, text, complete, children }: { n: number; title: string; text: string; complete: boolean; children: React.ReactNode }) {
+  return (
+    <section aria-labelledby={`offer-s${n}`} className="border-t border-line pt-6 first:border-t-0 first:pt-0">
+      <div className="mb-4 flex items-start gap-3">
+        <span
+          className={cn(
+            "mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs font-semibold",
+            complete ? "bg-violet text-white" : "border border-line-strong text-muted",
+          )}
+          aria-hidden
+        >
+          {complete ? <Check className="h-3 w-3" strokeWidth={3} /> : n}
+        </span>
+        <div className="min-w-0">
+          <h2 id={`offer-s${n}`} className="text-base font-semibold text-ink">
+            {title}
+            <span className="sr-only">{complete ? " (complete)" : ""}</span>
+          </h2>
+          <p className="mt-0.5 text-sm text-muted">{text}</p>
+        </div>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">{children}</div>
+    </section>
   );
 }

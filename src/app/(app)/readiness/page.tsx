@@ -1,16 +1,32 @@
 "use client";
 
+
 import Link from "next/link";
+import { Orb } from "@/components/orb";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { CHART, chartTick, chartTooltipStyle } from "@/lib/chart-theme";
 import { AlertTriangle } from "lucide-react";
 import { RequireProfile } from "@/components/require-profile";
 import { GuestPaywall } from "@/components/guest-paywall";
+import { JourneyList } from "@/components/journey-list";
 import { Badge, Card, CardTitle, LinkButton, PageHeader, Progress, ScorePill } from "@/components/ui";
 import { useWorkspace } from "@/components/workspace";
 import { ASSIGNMENTS } from "@/lib/assignments";
 import { formatDate } from "@/lib/cn";
+import { journeyProgress } from "@/lib/journey";
 import { bestScoreByKey, collectEvidence, computeReadiness, PASS_SCORE, READINESS_DEFS, READINESS_MIN_DIMENSIONS, recommendNext } from "@/lib/progress";
 import { READINESS_KEYS } from "@/lib/types";
+
+/** Plain-language meaning of each readiness dimension (display copy only; scoring lives in lib/progress). */
+const MEANING: Record<(typeof READINESS_KEYS)[number], string> = {
+  service_clarity: "Can you say exactly what you sell, to whom, and what is included?",
+  target_customer: "Do you know who buys this and what problem it solves for them?",
+  pricing_rationale: "Can you explain your price through scope, effort and value?",
+  portfolio: "Can you show honest proof of the work, such as a sample project?",
+  communication: "Do your messages and pitch make the value clear and easy to act on?",
+  objection_handling: "Can you handle “too expensive” or “someone is cheaper” without blind discounts?",
+  closing: "Do you end conversations with a concrete next step?",
+};
 
 export default function ReadinessPage() {
   return (
@@ -37,9 +53,10 @@ function Readiness() {
         sub="A transparent summary of skills you have demonstrated in missions and simulations. It is a learning indicator — not a prediction of income or a professional certification."
       />
       <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
-        <Card className="border-violet/30">
-          <p className="text-sm text-muted">Overall readiness</p>
-          <p className="text-6xl font-bold">
+        <Card className="relative isolate overflow-hidden">
+          <Orb size={210} className="-right-20 -top-20 -z-10 opacity-55" />
+          <h2 className="text-sm text-muted">Overall readiness</h2>
+          <p className="mt-1 text-6xl font-semibold tracking-tight text-ink [text-shadow:0_4px_30px_rgb(150_63_255/0.55)]">
             {r.overall ?? "—"}
             <span className="text-xl font-normal text-muted">/100</span>
           </p>
@@ -62,20 +79,25 @@ function Readiness() {
         </Card>
 
         <Card>
-          <CardTitle sub="Click through to the activities that build each dimension">Dimensions</CardTitle>
+          <CardTitle sub="Seven skills a client notices when you sell. Each score comes only from missions and simulations.">What the score is made of</CardTitle>
           <ul className="space-y-4">
             {READINESS_KEYS.map((k) => {
               const d = r.dimensions[k];
               return (
                 <li key={k}>
-                  <div className="flex items-center justify-between gap-2 text-sm">
-                    <span className="font-medium">{READINESS_DEFS[k].label}</span>
-                    <span className="flex items-center gap-2">
-                      <span className="text-xs text-muted">{d.evidenceCount} evidence</span>
+                  <div className="flex items-start justify-between gap-3 text-sm">
+                    <span className="min-w-0">
+                      <span className="block font-medium text-ink">{READINESS_DEFS[k].label}</span>
+                      <span className="mt-0.5 block text-xs text-muted">{MEANING[k]}</span>
+                    </span>
+                    <span className="flex shrink-0 items-center gap-2">
+                      <span className="hidden text-xs text-muted sm:inline">
+                        {d.evidenceCount} evidence
+                      </span>
                       <ScorePill score={d.score} />
                     </span>
                   </div>
-                  <Progress value={d.score} className="mt-1.5" label={READINESS_DEFS[k].label} />
+                  <Progress value={d.score} className="mt-2" label={READINESS_DEFS[k].label} />
                 </li>
               );
             })}
@@ -90,8 +112,8 @@ function Readiness() {
             <ul className="space-y-1 text-sm">
               {scored.slice(0, 3).map((k) => (
                 <li key={k} className="flex justify-between">
-                  <span>{READINESS_DEFS[k].label}</span>
-                  <span className="font-mono text-ink-2">{r.dimensions[k].score}</span>
+                  <span className="text-ink-2">{READINESS_DEFS[k].label}</span>
+                  <span className="font-medium tabular-nums text-ink">{r.dimensions[k].score}</span>
                 </li>
               ))}
             </ul>
@@ -100,7 +122,7 @@ function Readiness() {
           )}
         </Card>
         <Card>
-          <CardTitle>Weaknesses & gaps</CardTitle>
+          <CardTitle>Gaps to close</CardTitle>
           <ul className="space-y-1 text-sm">
             {[...scored]
               .reverse()
@@ -108,8 +130,8 @@ function Readiness() {
               .filter((k) => (r.dimensions[k].score ?? 100) < 80)
               .map((k) => (
                 <li key={k} className="flex justify-between">
-                  <span>{READINESS_DEFS[k].label}</span>
-                  <span className="font-mono text-ink-2">{r.dimensions[k].score}</span>
+                  <span className="text-ink-2">{READINESS_DEFS[k].label}</span>
+                  <span className="font-medium tabular-nums text-ink">{r.dimensions[k].score}</span>
                 </li>
               ))}
             {missing.map((k) => (
@@ -120,15 +142,20 @@ function Readiness() {
             ))}
           </ul>
         </Card>
-        <Card className="border-violet/30 bg-violet-tint/40">
+        <Card className="glass-lit">
           <CardTitle>Next learning step</CardTitle>
-          <p className="font-medium">{rec.title}</p>
+          <p className="font-medium text-ink">{rec.title}</p>
           <p className="mt-1 text-sm text-ink-2">{rec.reason}</p>
           <LinkButton href={rec.href} size="sm" className="mt-3">
             {rec.cta}
           </LinkButton>
         </Card>
       </div>
+
+      <Card className="mt-4">
+        <CardTitle sub="What stands between you and approaching real clients. Nothing here is locked — work on steps in any order.">Launch checklist</CardTitle>
+        <JourneyList progress={journeyProgress(state)} />
+      </Card>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <Card>
@@ -152,11 +179,11 @@ function Readiness() {
             <div style={{ width: "100%", height: 220 }} role="img" aria-label={`Readiness history: ${history.map((h) => h.overall ?? "n/a").join(", ")}`}>
               <ResponsiveContainer>
                 <LineChart data={history} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid stroke="#262633" vertical={false} />
-                  <XAxis dataKey="n" tick={{ fill: "#9a9ab0", fontSize: 11 }} tickLine={false} axisLine={{ stroke: "#34344a" }} />
-                  <YAxis domain={[0, 100]} tick={{ fill: "#9a9ab0", fontSize: 11 }} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={{ background: "#14141d", border: "1px solid #34344a", borderRadius: 10, fontSize: 12 }} labelFormatter={(_, p) => (p?.[0]?.payload as { date?: string } | undefined)?.date ?? ""} />
-                  <Line type="monotone" dataKey="overall" stroke="#a78bfa" strokeWidth={2} dot={{ r: 3, fill: "#8b5cf6" }} connectNulls />
+                  <CartesianGrid stroke={CHART.grid} vertical={false} />
+                  <XAxis dataKey="n" tick={chartTick} tickLine={false} axisLine={{ stroke: CHART.axis }} />
+                  <YAxis domain={[0, 100]} tick={chartTick} tickLine={false} axisLine={false} />
+                  <Tooltip contentStyle={chartTooltipStyle} labelFormatter={(_, p) => (p?.[0]?.payload as { date?: string } | undefined)?.date ?? ""} />
+                  <Line type="monotone" dataKey="overall" stroke={CHART.seriesSoft} strokeWidth={2} dot={{ r: 3, fill: CHART.series, stroke: CHART.surface, strokeWidth: 2 }} connectNulls />
                 </LineChart>
               </ResponsiveContainer>
             </div>

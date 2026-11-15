@@ -262,7 +262,7 @@ export function buildDemoState(): WorkspaceState {
     evaluation,
     overallScore: evaluation.overallScore,
   };
-  const base: WorkspaceState = { profile, offer, pricing, submissions, sessions: [session], snapshots: [] };
+  const base: WorkspaceState = { profile, offer, pricing, submissions, sessions: [session], snapshots: [], weeklyMissions: [], xp: [] };
   const r = computeReadiness(base);
   const dims = Object.fromEntries(READINESS_KEYS.map((k) => [k, r.dimensions[k].score])) as ReadinessSnapshot["dimensions"];
   return { ...base, snapshots: [{ id: uid(), overall: r.overall, dimensions: dims, createdAt: session.endedAt ?? ago(2) }] };

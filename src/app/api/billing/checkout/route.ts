@@ -26,8 +26,8 @@ export async function POST(req: Request) {
       client_reference_id: user.id,
       customer_email: user.email,
       subscription_data: { metadata: { user_id: user.id } },
-      success_url: `${origin}/pricing?checkout=complete`,
-      cancel_url: `${origin}/pricing?checkout=cancelled`,
+      success_url: `${origin}/subscription?checkout=complete`,
+      cancel_url: `${origin}/subscription?checkout=cancelled`,
     });
     return NextResponse.json({ url: session.url });
   } catch (e) {

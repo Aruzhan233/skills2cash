@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { z } from "zod";
 import { Logo } from "./logo";
-import { Button, Card, ErrorState, Field, Input, LinkButton, Notice } from "./ui";
+import { Button, Card, ErrorState, Field, Input, LinkButton, Notice, PageLoader } from "./ui";
 import { useWorkspace } from "./workspace";
 import { getSupabase, supabaseConfigured } from "@/lib/client/supabase";
 
@@ -18,7 +18,15 @@ export function AuthForm({ kind }: { kind: "login" | "signup" }) {
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") || "/dashboard";
+  // Only same-site paths: "//host" would leave the app.
+  const destination = next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
   const ws = useWorkspace();
+  const signedIn = ws.auth.status === "signed_in";
+
+  // A valid session already exists: go to the destination instead of asking to log in again.
+  useEffect(() => {
+    if (signedIn) router.replace(destination);
+  }, [signedIn, destination, router]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
@@ -53,7 +61,7 @@ export function AuthForm({ kind }: { kind: "login" | "signup" }) {
         if (err) throw err;
       }
       if (ws.mode === "demo") ws.exitDemo();
-      router.push(next.startsWith("/") ? next : "/dashboard");
+      router.push(destination);
     } catch (err) {
       setError((err as Error).message || "Authentication failed.");
     } finally {
@@ -61,15 +69,19 @@ export function AuthForm({ kind }: { kind: "login" | "signup" }) {
     }
   }
 
+  if (signedIn) return <PageLoader label="You are already signed in. Opening your workspace…" />;
+
   const title = kind === "login" ? "Log in to Skills2Cash" : "Create your account";
 
   return (
-    <div className="bg-grid flex min-h-screen flex-col items-center justify-center px-4 py-12">
-      <div className="mb-8">
-        <Logo />
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-12">
+      <div className="sky" aria-hidden />
+      <div className="pointer-events-none absolute left-1/2 top-[18%] aspect-square w-[min(900px,140vw)] -translate-x-1/2 rounded-full [box-shadow:inset_0_2px_0_rgb(236_226_255/0.6),inset_0_24px_60px_rgb(150_63_255/0.4),0_-24px_90px_-10px_rgb(150_63_255/0.5)] [mask-image:linear-gradient(180deg,#000_30%,transparent_60%)]" aria-hidden />
+      <div className="relative mb-8">
+        <Logo size={40} />
       </div>
-      <Card className="w-full max-w-md p-6">
-        <h1 className="text-xl font-bold">{title}</h1>
+      <Card className="relative w-full max-w-md p-6 shadow-glow-lg sm:p-8">
+        <h1 className="text-2xl font-semibold">{title}</h1>
         <p className="mt-1 text-sm text-muted">
           {kind === "login" ? "Your profile, missions and simulations are saved to your account." : "Free to start. Your progress is private to you."}
         </p>

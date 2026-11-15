@@ -16,7 +16,9 @@ Full product spec: [`PROJECT_DOCUMENTATION.md`](PROJECT_DOCUMENTATION.md) · Bui
 | Dashboard | `/dashboard` | Next recommended action, readiness, stage progress, recent activity |
 | Learning Path | `/path` | Discover → Build → Price → Practice → Launch: objectives, lesson, example, completion criteria, adaptive recommendation |
 | Service Builder | `/service-builder` | Skill, name, customer, problem, outcome, deliverables, scope, timeline, revisions, UVP, exclusions, pricing model, price + rationale. **Improve with AI** suggests per-field edits. Saved offer feeds the simulator |
-| Pricing Builder | `/pricing` | Hours × $/hour + costs → cost floor; Basic/Standard/Premium packages (all editable); AI pricing coach (rationale, risks, validation steps) |
+| Pricing Builder | `/service-builder/pricing` | Hours × $/hour + costs → cost floor; Basic/Standard/Premium packages (all editable); AI pricing coach (rationale, risks, validation steps) |
+| Weekly Missions | `/assignments/weekly` | 2–4 personalised real-world tasks per week (chosen from weakest competencies, current stage, skill level and hours available); details, deadline, self-reported completion with a note, XP reward, weekly statistics, history; a completed mission is not issued again while new ones remain |
+| Progress Tracker | `/progress` | Eight-phase monetization journey with percentages calculated from saved activity, milestone cards, weekly activity, skills developed / to improve, achievements (locked/unlocked, XP), level and XP history |
 | AI Client Simulator | `/practice`, `/practice/[scenarioId]` | 7 scenarios (Beginner → Advanced). Multi-turn chat with an in-character AI client. **End Session** triggers a separate evaluator call |
 | Results | `/practice/session/[id]` | 8 rubric scores with quotes from your messages, strengths, mistakes, improvements with example lines, next exercise, transcript |
 | Missions | `/assignments`, `/assignments/[id]` | 8 practical missions with rubric, AI feedback, score, attempts history |
@@ -85,6 +87,7 @@ The Supabase service-role key is used only by the server-side Stripe webhook to 
    - `supabase/migrations/20261114000000_init.sql` — 11 tables, indexes, constraints, triggers, RLS policies
    - `supabase/migrations/20261114000100_seed.sql` — mission and scenario catalog (generated from `src/lib` by `npm run db:seed-sql`)
    - `supabase/migrations/20261114000200_billing.sql` — subscription status, read-only for authenticated clients
+   - `supabase/migrations/20261115000000_retention.sql` — weekly missions and the XP ledger (owner-only RLS; unique constraints prevent duplicate missions and duplicate rewards). Until it is applied, weekly missions and XP are stored in the browser and the UI says so.
    - `supabase/migrations/20261114000300_grants.sql` — explicit Data API grants, still subject to RLS
 
    or with the CLI: `supabase link --project-ref <ref> && supabase db push`.
