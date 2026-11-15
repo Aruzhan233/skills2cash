@@ -403,12 +403,6 @@ skills2cash/
 
 Contributors in the repository's commit history: **Aruzhan233** (repository owner), **Dinara** and **asemnurlan**.
 
-| Name | Role | Responsibilities |
-| --- | --- | --- |
-| <!-- TODO --> _Name_ | _Role_ | _Responsibilities_ |
-| <!-- TODO --> _Name_ | _Role_ | _Responsibilities_ |
-| <!-- TODO --> _Name_ | _Role_ | _Responsibilities_ |
-
 <!-- TODO(team): fill in full names, roles and responsibilities. Do not add personal contact details you don't want public. -->
 
 ---
