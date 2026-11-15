@@ -350,14 +350,24 @@ function ModeBanner() {
       </div>
     );
   }
+  if (ws.pendingGuestTransfer) {
+    // Signed in: this is the account workspace. Guest progress from this browser is only offered for transfer.
+    return (
+      <div className="border-b border-line bg-violet-tint/50">
+        <div className="flex flex-wrap items-center gap-2 px-4 py-2 text-xs text-ink-2 sm:px-6 lg:px-10">
+          This browser still has progress from a guest session.{" "}
+          <button disabled={busy} onClick={async () => { setBusy(true); setTransferError(""); try { await ws.migrateGuestData(); } catch (e) { setTransferError((e as Error).message); } finally { setBusy(false); } }} className="font-semibold text-violet-soft underline">{busy ? "Transferring…" : "Transfer progress to my account"}</button>
+          {transferError && <span role="alert" className="basis-full text-bad">Transfer failed: {transferError} Your guest data is still saved in this browser; you can retry.</span>}
+        </div>
+      </div>
+    );
+  }
   if (ws.guest) {
     return (
       <div className="border-b border-line bg-violet-tint/50">
         <div className="flex flex-wrap items-center gap-2 px-4 py-2 text-xs text-ink-2 sm:px-6 lg:px-10">
-          Guest workspace — progress is saved in this browser. {ws.auth.status === "signed_in" ? (
-            <button disabled={busy} onClick={async () => { setBusy(true); setTransferError(""); try { await ws.migrateGuestData(); } catch (e) { setTransferError((e as Error).message); } finally { setBusy(false); } }} className="font-semibold text-violet-soft underline">{busy ? "Transferring…" : "Transfer progress to my account"}</button>
-          ) : <Link href="/signup?next=%2Fdashboard" className="font-semibold text-violet-soft underline">Create an account to keep it</Link>}
-          {transferError && <span role="alert" className="basis-full text-bad">Transfer failed: {transferError} Your guest data is still saved here.</span>}
+          Guest workspace — progress is saved in this browser.{" "}
+          <Link href="/signup?next=%2Fdashboard" className="font-semibold text-violet-soft underline">Create an account to keep it</Link>
         </div>
       </div>
     );

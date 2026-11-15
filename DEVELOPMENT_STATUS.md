@@ -2,6 +2,28 @@
 
 _Last updated: 2026-11-15_
 
+## Guest sign-in and progress transfer fix (2026-11-15)
+
+- Bug A (signed in but still in the Guest workspace): the workspace picked its store with the stored Guest Mode flag
+  (`skills2cash_guest_session`) checked *before* the Supabase session, and nothing cleared that flag on sign-in. Now the
+  session wins: signing in clears the flag, the account store opens, and guest data (kept in `skills2cash_guest_data`) is only
+  offered for transfer. The workspace waits for the session check before opening any store (no guest flash), and data loaded
+  from one store is never shown or written under another while the next one loads. `/guest-start` sends signed-in users to
+  `/dashboard`.
+- Bug B ("Could not find the table 'public.weekly_missions'" on transfer): `importRetention` queried `weekly_missions`
+  directly and ignored the browser fallback set when the tables are missing. The retention migrations are still **not applied**
+  on the configured project (re-checked: PGRST205 for both tables, PGRST202 for the function). Transfer now succeeds: core
+  progress goes to the database, and missions/XP wait for the account in this browser (labelled) and move into the database
+  automatically once the migrations are applied.
+- Transfer (`src/lib/client/guest-transfer.ts`): session re-verified with `auth.getUser()`, records validated, account data never
+  overwritten (account's profile/offer/pricing win; history added by id; readiness history only for the same profile; missions
+  deduplicated by id or week + template; achievements once). Each step is idempotent, so a retry completes an interrupted
+  transfer without duplicates; guest data is removed only after every step succeeds (unmerged guest copies are archived in
+  `skills2cash_guest_archive`).
+- Tests: `npm test` 29/29; PGlite (all six migrations) 37/37 including cross-user checks on every transfer table; browser
+  scenarios on a production build with a stateful Supabase stand-in 27/27; regressions: flow 44/44 checks, navigation 35/35,
+  auth 19/19; no page exceptions. Not run against the real Supabase project.
+
 ## Redesign pass 3 — "Rising Horizon" premium purple identity (2026-11-15)
 
 Owner brief: complete premium redesign from four reference images (fifth never arrived; owner chose to proceed), pinned palette

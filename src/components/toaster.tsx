@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-import { AlertTriangle, Award, Sparkles, TrendingUp, X } from "lucide-react";
+import { AlertTriangle, Award, CheckCircle2, Sparkles, TrendingUp, X } from "lucide-react";
 import { useWorkspace, type Toast } from "./workspace";
 import { cn } from "@/lib/cn";
 
-const ICON = { achievement: Award, xp: Sparkles, level: TrendingUp, warn: AlertTriangle } as const;
+const ICON = { achievement: Award, xp: Sparkles, level: TrendingUp, warn: AlertTriangle, success: CheckCircle2 } as const;
 
 function ToastCard({ toast, onClose }: { toast: Toast; onClose: () => void }) {
   useEffect(() => {
@@ -14,15 +14,16 @@ function ToastCard({ toast, onClose }: { toast: Toast; onClose: () => void }) {
   }, [toast.kind, onClose]);
   const Icon = ICON[toast.kind];
   const warn = toast.kind === "warn";
+  const success = toast.kind === "success";
   return (
     <div
       role={warn ? "alert" : "status"}
       className={cn(
         "glass-float pointer-events-auto flex w-full animate-toast-in items-start gap-3 rounded-2xl p-3",
-        warn ? "border-warn/40" : "border-spark/35",
+        warn ? "border-warn/40" : success ? "border-good/35" : "border-spark/35",
       )}
     >
-      <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-lg", warn ? "bg-warn/10 text-warn" : "animate-unlock bg-spark/15 text-spark")}>
+      <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-lg", warn ? "bg-warn/10 text-warn" : success ? "bg-good/10 text-good" : "animate-unlock bg-spark/15 text-spark")}>
         <Icon className="h-4 w-4" aria-hidden />
       </span>
       <div className="min-w-0 flex-1">
@@ -36,7 +37,7 @@ function ToastCard({ toast, onClose }: { toast: Toast; onClose: () => void }) {
   );
 }
 
-/** Achievement, XP and level-up notifications. */
+/** Achievement, XP, level-up and confirmation notifications. */
 export function Toaster() {
   const { toasts, dismissToast } = useWorkspace();
   if (!toasts.length) return null;

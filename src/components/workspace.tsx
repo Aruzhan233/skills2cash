@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { getSupabase, supabaseConfigured } from "@/lib/client/supabase";
 import { LocalRepository, SupabaseRepository, type Repository } from "@/lib/client/repository";
+import { hasGuestProgress, transferGuestProgress, type TransferSummary } from "@/lib/client/guest-transfer";
 import { buildDemoState } from "@/lib/demo";
 import { newId } from "@/lib/id";
 import { achievements, computeReadiness, currentStage, stageProgress } from "@/lib/progress";
@@ -29,6 +30,8 @@ export interface GuestUsage { assessments_used: number; offers_created: number; 
 export interface GuestData { sessionId: string; createdAt: string; usage: GuestUsage }
 const GUEST_MODE_KEY = "skills2cash_guest_session";
 const GUEST_DATA_KEY = "skills2cash_guest_data";
+/** Guest records not copied because the account already had its own version (kept, never deleted). */
+const GUEST_ARCHIVE_KEY = "skills2cash_guest_archive";
 const EMPTY_USAGE: GuestUsage = { assessments_used: 0, offers_created: 0, simulations_completed: 0 };
 
 function persistGuestUsage(usage: GuestUsage) {
@@ -45,7 +48,7 @@ function persistGuestUsage(usage: GuestUsage) {
 
 export interface Toast {
   id: string;
-  kind: "achievement" | "xp" | "level" | "warn";
+  kind: "achievement" | "xp" | "level" | "warn" | "success";
   title: string;
   body?: string;
 }
@@ -58,11 +61,14 @@ interface WorkspaceCtx {
   toasts: Toast[];
   dismissToast: (id: string) => void;
   mode: Mode;
+  /** True only while the visitor is using Guest Mode without being signed in. */
   guest: boolean;
+  /** Signed in, and this browser still holds progress from a guest session that can be transferred. */
+  pendingGuestTransfer: boolean;
   guestUsage: GuestUsage;
   beginGuest: () => void;
   clearGuest: () => void;
-  migrateGuestData: () => Promise<void>;
+  migrateGuestData: () => Promise<TransferSummary>;
   scripted: boolean;
   setScripted: (v: boolean) => void;
   auth: { status: AuthStatus; email: string | null };
@@ -111,7 +117,9 @@ function snapshotChanged(prev: ReadinessSnapshot | undefined, next: Omit<Readine
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<Mode | null>(null);
-  const [guest, setGuest] = useState(false);
+  // The stored Guest Mode choice. It never outranks a signed-in session (see `guest` below).
+  const [guestFlag, setGuest] = useState(false);
+  const [pendingGuestTransfer, setPendingGuestTransfer] = useState(false);
   const [guestUsage, setGuestUsage] = useState<GuestUsage>(EMPTY_USAGE);
   const [scripted, setScriptedState] = useState(false);
   const [auth, setAuth] = useState<{ status: AuthStatus; email: string | null; userId: string | null }>({
@@ -123,6 +131,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<LoadStatus>("loading");
   const [error, setError] = useState<string | null>(null);
   const [nonce, setNonce] = useState(0);
+  const [loadedFrom, setLoadedFrom] = useState<Repository | null>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
 
@@ -141,10 +150,13 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const sb = getSupabase();
     if (!sb) return;
-    sb.auth.getSession().then(({ data }) => {
-      const u = data.session?.user;
-      setAuth({ status: u ? "signed_in" : "signed_out", email: u?.email ?? null, userId: u?.id ?? null });
-    });
+    sb.auth
+      .getSession()
+      .then(({ data }) => {
+        const u = data.session?.user;
+        setAuth({ status: u ? "signed_in" : "signed_out", email: u?.email ?? null, userId: u?.id ?? null });
+      })
+      .catch(() => setAuth({ status: "signed_out", email: null, userId: null }));
     const { data: sub } = sb.auth.onAuthStateChange((_e, session) => {
       const u = session?.user;
       setAuth({ status: u ? "signed_in" : "signed_out", email: u?.email ?? null, userId: u?.id ?? null });
@@ -152,22 +164,51 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  // A signed-in session is the source of truth: it replaces Guest Mode. Guest progress stays in this
+  // browser (offered for transfer) until it is moved into the account.
+  const signedIn = auth.status === "signed_in" && Boolean(auth.userId);
+  const guest = guestFlag && !signedIn;
+  useEffect(() => {
+    if (signedIn && guestFlag) {
+      localStorage.removeItem(GUEST_MODE_KEY);
+      setGuest(false);
+    }
+  }, [signedIn, guestFlag]);
+
   const repo: Repository | null = useMemo(() => {
     if (mode === null || typeof window === "undefined") return null;
     if (mode === "demo") return demoRepo();
-    if (guest) return new LocalRepository(GUEST_DATA_KEY, localStorage);
-    if (!supabaseConfigured) return new LocalRepository("s2c:local", localStorage);
+    // Until the session is known, open nothing: otherwise a guest workspace would flash and then be replaced.
+    if (supabaseConfigured && auth.status === "loading") return null;
     const sb = getSupabase();
     if (sb && auth.status === "signed_in" && auth.userId) return new SupabaseRepository(sb, auth.userId);
+    if (guestFlag) return new LocalRepository(GUEST_DATA_KEY, localStorage);
+    if (!supabaseConfigured) return new LocalRepository("s2c:local", localStorage);
     return null;
-  }, [mode, guest, auth.status, auth.userId]);
+  }, [mode, guestFlag, auth.status, auth.userId]);
+
+  // Signed in with guest progress still in this browser: offer to transfer it.
+  useEffect(() => {
+    if (!signedIn) {
+      setPendingGuestTransfer(false);
+      return;
+    }
+    let cancelled = false;
+    new LocalRepository(GUEST_DATA_KEY, localStorage)
+      .load()
+      .then((s) => !cancelled && setPendingGuestTransfer(hasGuestProgress(s)))
+      .catch(() => !cancelled && setPendingGuestTransfer(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [signedIn, nonce]);
 
   const storage: WorkspaceCtx["storage"] = mode === "demo" ? "demo" : repo?.kind ?? null;
 
   useEffect(() => {
     if (mode === null) return;
     if (!repo) {
-      if (mode === "live" && auth.status === "signed_out" && !guest) {
+      if (mode === "live" && auth.status === "signed_out" && !guestFlag) {
         setState(EMPTY_STATE);
         setStatus("needs_auth");
       }
@@ -195,6 +236,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         }
         if (!cancelled) {
           setState(s);
+          setLoadedFrom(repo);
           setStatus("ready");
         }
       })
@@ -207,7 +249,11 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [repo, mode, auth.status, guest, nonce]);
+  }, [repo, mode, auth.status, guestFlag, nonce]);
+
+  // `state` belongs to the store it was loaded from. While a different store (e.g. guest -> account) is
+  // loading, report "loading" so nothing shows, or writes, the previous store's data under the new one.
+  const current: LoadStatus = status === "ready" && loadedFrom !== repo ? "loading" : status;
 
   const [toasts, setToasts] = useState<Toast[]>([]);
   const pushToasts = useCallback((ts: Array<Omit<Toast, "id">>) => {
@@ -218,7 +264,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   // Weekly missions: issue this week's personalised set the first time the workspace is opened in a new week.
   const issuing = useRef<string | null>(null);
   useEffect(() => {
-    if (status !== "ready" || !repo || !state.profile) return;
+    if (current !== "ready" || !repo || !state.profile) return;
     const week = weekStartOf(new Date());
     const tag = `${week}:${state.profile.id}`;
     if (issuing.current === tag) return;
@@ -229,13 +275,13 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       .saveWeeklyMissions(fresh)
       .then(() => setState((cur) => ({ ...cur, weeklyMissions: [...cur.weeklyMissions.filter((m) => !fresh.some((f) => f.id === m.id)), ...fresh] })))
       .catch((e: Error) => pushToasts([{ kind: "warn", title: "Weekly missions could not be saved", body: e.message }]));
-  }, [status, repo, state, pushToasts]);
+  }, [current, repo, state, pushToasts]);
 
   // Achievements: when real activity unlocks one, record its XP exactly once and notify.
   const awarding = useRef(false);
   const failedAwards = useRef(new Set<string>());
   useEffect(() => {
-    if (status !== "ready" || !repo || awarding.current) return;
+    if (current !== "ready" || !repo || awarding.current) return;
     const pending = achievements(state).filter(
       (a) => a.earned && !state.xp.some((t) => t.source === "achievement" && t.refKey === a.key) && !failedAwards.current.has(a.key),
     );
@@ -269,7 +315,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       if (failure) pushToasts([{ kind: "warn", title: "Some XP could not be saved", body: failure }]);
       awarding.current = false;
     })();
-  }, [status, repo, state, pushToasts]);
+  }, [current, repo, state, pushToasts]);
 
   const requireRepo = useCallback((): Repository => {
     if (!repo) throw new Error("Choose Continue as Guest or sign in to save your progress.");
@@ -349,6 +395,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     },
     mode: mode ?? "live",
     guest,
+    pendingGuestTransfer,
     guestUsage,
     beginGuest: () => {
       const current = (() => { try { return JSON.parse(localStorage.getItem(GUEST_DATA_KEY) || "null") as GuestData | null; } catch { return null; } })();
@@ -361,37 +408,50 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     },
     clearGuest: () => { localStorage.removeItem(GUEST_MODE_KEY); localStorage.removeItem(GUEST_DATA_KEY); setGuest(false); setGuestUsage(EMPTY_USAGE); setNonce((n) => n + 1); },
     migrateGuestData: async () => {
-      if (!guest || auth.status !== "signed_in" || !auth.userId) throw new Error("Sign in before transferring guest progress.");
-      const target = new SupabaseRepository(getSupabase()!, auth.userId);
-      const [sourceState, targetState] = await Promise.all([new LocalRepository(GUEST_DATA_KEY, localStorage).load(), target.load()]);
-      if (sourceState.profile && targetState.profile && sourceState.profile.id !== targetState.profile.id) {
-        throw new Error("This account already has a different skill profile. Guest data is preserved here; resolve the profile conflict before transferring.");
+      const sb = getSupabase();
+      if (!sb || !signedIn || !auth.userId) throw new Error("Sign in before transferring guest progress.");
+      // Re-check the session with the auth server, so progress can only go into the account that is signed in now.
+      const { data: who, error: whoErr } = await sb.auth.getUser();
+      if (whoErr || !who.user || who.user.id !== auth.userId) throw new Error("Your session could not be verified. Sign in again, then retry.");
+      const guestStore = new LocalRepository(GUEST_DATA_KEY, localStorage);
+      const target = new SupabaseRepository(sb, who.user.id);
+      // Throws on any failure; the guest copy is untouched until every step has succeeded.
+      const summary = await transferGuestProgress(await guestStore.load(), target);
+      if (summary.keptFromAccount.length) {
+        // Not copied because the account has its own version: keep the guest copy in this browser rather than delete it.
+        try {
+          localStorage.setItem(GUEST_ARCHIVE_KEY, JSON.stringify({ savedAt: new Date().toISOString(), data: JSON.parse(localStorage.getItem(GUEST_DATA_KEY) || "null") }));
+        } catch { /* storage full: the transfer itself already succeeded */ }
       }
-      if (sourceState.offer && targetState.offer && sourceState.offer.id !== targetState.offer.id) {
-        throw new Error("This account already has a different service offer. Guest data is preserved here; resolve the offer conflict before transferring.");
-      }
-      if (sourceState.pricing && targetState.pricing && sourceState.pricing.id !== targetState.pricing.id) {
-        throw new Error("This account already has a different pricing worksheet. Guest data is preserved here; resolve the conflict before transferring.");
-      }
-      if (!targetState.profile && sourceState.profile) await target.saveProfile(sourceState.profile);
-      if (!targetState.offer && sourceState.offer) await target.saveOffer(sourceState.offer);
-      if (!targetState.pricing && sourceState.pricing) await target.savePricing(sourceState.pricing);
-      const targetSubmissionIds = new Set(targetState.submissions.map((item) => item.id));
-      for (const item of sourceState.submissions) if (!targetSubmissionIds.has(item.id)) await target.addSubmission(item);
-      const targetSessions = new Map(targetState.sessions.map((item) => [item.id, item]));
-      for (const item of sourceState.sessions) if (!targetSessions.has(item.id)) await target.saveSession(item);
-      const targetSnapshotIds = new Set(targetState.snapshots.map((item) => item.id));
-      for (const item of sourceState.snapshots) if (!targetSnapshotIds.has(item.id)) await target.addSnapshot(item);
-      // Weekly missions and XP: skip anything the account already has (same week + mission, or same award).
-      const hasMission = (m: WeeklyMission) => targetState.weeklyMissions.some((t) => t.id === m.id || (t.weekStart === m.weekStart && t.templateKey === m.templateKey));
-      const movedMissions = sourceState.weeklyMissions.filter((m) => !hasMission(m));
-      // Completed missions are re-completed in the account (keeping their time), which records their XP exactly once.
-      await target.importRetention(movedMissions, sourceState.xp);
       localStorage.removeItem(GUEST_MODE_KEY);
       localStorage.removeItem(GUEST_DATA_KEY);
       setGuest(false);
       setGuestUsage(EMPTY_USAGE);
+      setPendingGuestTransfer(false);
       setNonce((n) => n + 1);
+      const parts = [
+        summary.profile && "skill profile",
+        summary.offer && "service offer",
+        summary.pricing && "pricing",
+        summary.submissions && `${summary.submissions} assignment${summary.submissions === 1 ? "" : "s"}`,
+        summary.sessions && `${summary.sessions} simulation${summary.sessions === 1 ? "" : "s"}`,
+        summary.missions && `${summary.missions} weekly mission${summary.missions === 1 ? "" : "s"}`,
+        summary.achievements && `${summary.achievements} achievement${summary.achievements === 1 ? "" : "s"}`,
+      ].filter(Boolean);
+      pushToasts([
+        {
+          kind: "success",
+          title: "Guest progress transferred to your account",
+          body: [
+            parts.length ? `Moved: ${parts.join(", ")}.` : "Everything was already in your account.",
+            summary.keptFromAccount.length && `Your account's own ${summary.keptFromAccount.join(", ")} ${summary.keptFromAccount.length === 1 ? "was" : "were"} kept.`,
+            summary.retentionInBrowser && "Weekly missions and XP stay in this browser for your account until the database update is applied.",
+          ]
+            .filter(Boolean)
+            .join(" "),
+        },
+      ]);
+      return summary;
     },
     scripted,
     setScripted: (v) => {
@@ -401,7 +461,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     auth: { status: auth.status, email: auth.email },
     storage,
     state,
-    status,
+    status: current,
     error,
     reload: () => setNonce((n) => n + 1),
     saveProfile: async (p) => {

@@ -339,6 +339,16 @@ export class SupabaseRepository implements Repository {
    * completeWeeklyMission, keeping their original completion time; achievement XP is added once.
    */
   async importRetention(missions: WeeklyMission[], xp: XpTransaction[]) {
+    if (this.retentionLocal) {
+      // Tables not available yet: keep them with this account in this browser; load() moves them into the database once they exist.
+      const cur = this.readRetention();
+      const weeklyMissions = mergeMissions(cur.weeklyMissions, missions);
+      const ids = new Set(weeklyMissions.map((m) => m.id));
+      // Mission XP only for missions actually kept (a duplicate of an account mission pays nothing twice).
+      const incoming = xp.filter((t) => t.source === "achievement" || ids.has(t.refKey));
+      this.writeRetention({ weeklyMissions, xp: [...cur.xp, ...incoming.filter((t) => !cur.xp.some((x) => sameAward(x, t)))] });
+      return;
+    }
     // Skip missions the account already has (same id, or same week + template), so a retry never re-saves them.
     const existing = check(await this.db.from("weekly_missions").select("id, week_start, template_key")) as Row[];
     const fresh = missions.filter((m) => !existing.some((e) => e.id === m.id || (e.week_start === m.weekStart && e.template_key === m.templateKey)));
