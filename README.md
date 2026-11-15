@@ -20,7 +20,7 @@ Full product spec: [`PROJECT_DOCUMENTATION.md`](PROJECT_DOCUMENTATION.md) · Bui
 | Weekly Missions | `/assignments/weekly` | 2–4 personalised real-world tasks per week (chosen from weakest competencies, current stage, skill level and hours available); details, deadline, self-reported completion with a note, XP reward, weekly statistics, history; a completed mission is not issued again while new ones remain |
 | Progress Tracker | `/progress` | Eight-phase monetization journey with percentages calculated from saved activity, milestone cards, weekly activity, skills developed / to improve, achievements (locked/unlocked, XP), level and XP history |
 | AI Client Simulator | `/practice`, `/practice/[scenarioId]` | 7 scenarios (Beginner → Advanced). Multi-turn chat with an in-character AI client. **End Session** triggers a separate evaluator call |
-| Results | `/practice/session/[id]` | 8 rubric scores with quotes from your messages, strengths, mistakes, improvements with example lines, next exercise, transcript |
+| Results | `/practice/session/[id]` | 8 rubric scores with quotes from messages, strengths, mistakes, improvements with example lines, next exercise, transcript |
 | Missions | `/assignments`, `/assignments/[id]` | 8 practical missions with rubric, AI feedback, score, attempts history |
 | Readiness | `/readiness` | 7 readiness dimensions from demonstrated evidence only, history chart, next step |
 | Auth | `/login`, `/signup` | Supabase email/password; app routes redirect to login when Supabase is configured and the user is signed out |
@@ -92,9 +92,9 @@ The Supabase service-role key is used only by the server-side Stripe webhook to 
 
    or with the CLI: `supabase link --project-ref <ref> && supabase db push`.
 3. Authentication → Providers → Email: enabled. For a hackathon demo you may disable *Confirm email* so sign-up logs in immediately.
-4. Authentication → URL configuration: add your Vercel URL.
+4. Authentication → URL configuration: https://skills2cash-dncv.vercel.app/.
 
-Tables: `profiles`, `skill_profiles`, `learning_paths`, `service_offers`, `pricing_worksheets`, `assignments` (catalog), `assignment_submissions`, `roleplay_scenarios` (catalog), `roleplay_sessions`, `roleplay_messages`, `readiness_snapshots`. Owner-only policies on every user table; catalogs are read-only; evidence (submissions, messages, snapshots) is insert/read/delete only; a session can be updated only while `active`, and messages can only be added to your own active session. These policies were tested against PostgreSQL with a stubbed `auth` schema (user B cannot read or write user A's rows; completed sessions cannot be altered).
+Tables: `profiles`, `skill_profiles`, `learning_paths`, `service_offers`, `pricing_worksheets`, `assignments` (catalog), `assignment_submissions`, `roleplay_scenarios` (catalog), `roleplay_sessions`, `roleplay_messages`, `readiness_snapshots`. Owner-only policies on every user table; catalogs are read-only; evidence (submissions, messages, snapshots) is insert/read/delete only; a session can be updated only while `active`, and messages can only be added to active session. These policies were tested against PostgreSQL with a stubbed `auth` schema (user B cannot read or write user A's rows; completed sessions cannot be altered).
 
 ## Architecture
 
@@ -141,7 +141,7 @@ All thresholds live in `src/lib/config.ts` and are initial product settings, not
 Create an **empty public** repository named `skills2cash` on GitHub (no README, no .gitignore), then from the project folder:
 
 ```bash
-git remote add origin https://github.com/<your-account>/skills2cash.git
+git remote add origin https://github.com/Aruzhan233/skills2cash.git
 git branch -M main
 git push -u origin main
 ```
@@ -150,7 +150,7 @@ Teammates then clone it and run `npm install`. Never commit `.env*` files (they 
 
 ### Vercel
 
-1. vercel.com → **Add New… → Project** → import your `skills2cash` repository (framework auto-detected: Next.js; build `npm run build`).
+1. vercel.com → **Add New… → Project** → import `skills2cash` repository (framework auto-detected: Next.js; build `npm run build`).
 2. **Settings → Environment Variables** (Production + Preview): `OPENAI_API_KEY`, optionally `OPENAI_MODEL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 3. Deploy, then open `/api/health` — it should return `{"ai":true,"supabase":true}`.
 4. Add the production URL to Supabase → Authentication → URL configuration.
